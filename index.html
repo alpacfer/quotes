@@ -2,139 +2,84 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>My Quotes Website</title>
-  <link
-    rel="stylesheet"
-    href="styles.css"
-  />
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!-- Header Bar (Hidden on Main Menu) -->
   <header id="topNav" class="hidden">
     <nav class="navbar">
-      <!-- House Icon for Main Menu -->
-      <button
-        id="homeBtn"
-        class="nav-button"
-        title="Home"
-      >
-        🏠
-      </button>
-      <button
-        id="quotesNavBtn"
-        class="nav-button"
-      >
-        Quotes
-      </button>
-      <button
-        id="authorsNavBtn"
-        class="nav-button"
-      >
-        Authors
-      </button>
-      <button
-        id="booksNavBtn"
-        class="nav-button"
-      >
-        Books
-      </button>
+      <button id="homeBtn" class="nav-button" title="Home">🏠</button>
+      <button id="quotesNavBtn" class="nav-button">Quotes</button>
+      <button id="authorsNavBtn" class="nav-button">Authors</button>
+      <button id="booksNavBtn" class="nav-button">Books</button>
     </nav>
   </header>
 
   <main>
     <!-- Main Menu -->
     <div id="mainMenu">
-      <h2>Main Menu</h2>
+      <h1>Welcome to My Quotes</h1>
+      <p>A curated place for your favorite quotes.</p>
       <div class="menu">
-        <button
-          class="menu-button"
-          id="quotesMenu"
-        >
-          Quotes
-        </button>
-        <button
-          class="menu-button"
-          id="authorsMenu"
-        >
-          Authors
-        </button>
-        <button
-          class="menu-button"
-          id="booksMenu"
-        >
-          Books
-        </button>
+        <button class="menu-button" id="quotesMenu">Quotes</button>
+        <button class="menu-button" id="authorsMenu">Authors</button>
+        <button class="menu-button" id="booksMenu">Books</button>
       </div>
     </div>
 
     <!-- Quotes Page -->
-    <div
-      id="quotesPage"
-      class="hidden"
-    >
-      <h2>Quotes</h2>
-
-      <!-- Add Quote Form -->
-      <div id="addQuoteMenu">
-        <h3>Add a Quote</h3>
-        <form id="quoteForm">
-          <label for="quoteText">Quote:</label>
-          <textarea
-            id="quoteText"
-            rows="4"
-            required
-          ></textarea>
-
-          <label for="bookTitle">Book Title:</label>
-          <input
-            type="text"
-            id="bookTitle"
-            required
-          />
-
-          <label for="authorName">Author:</label>
-          <input
-            type="text"
-            id="authorName"
-            required
-          />
-
-          <button type="submit">Add Quote</button>
-        </form>
+    <div id="quotesPage" class="hidden">
+      <div class="quotes-header">
+        <h2>Quotes</h2>
+        <button
+          id="addQuoteToggle"
+          class="hidden"
+          title="Add Quote"
+        >+</button>
       </div>
-
-      <!-- Quotes Grid -->
-      <div
-        id="quotesGrid"
-        class="quotes-grid"
-      >
-        <h3>All Quotes</h3>
+      <div id="quotesGrid" class="quotes-grid">
+        <!-- No "All Quotes" text here -->
         <div class="grid"></div>
       </div>
     </div>
 
     <!-- Authors Page -->
-    <div
-      id="authorsPage"
-      class="hidden"
-    >
+    <div id="authorsPage" class="hidden">
       <h2>Authors</h2>
-      <div
-        id="authorsList"
-        class="authors-list"
-      ></div>
+      <div id="authorsList" class="authors-list"></div>
     </div>
 
     <!-- Books Page -->
     <div id="booksPage" class="hidden">
-        <h2>Books</h2>
-        <div id="booksList" class="books-list"></div>
+      <h2>Books</h2>
+      <div id="booksList" class="books-list"></div>
     </div>
-  
+
+    <!-- Modal for Add/Edit Quote -->
+    <div id="addQuoteMenu" class="modal hidden">
+      <!-- Close Modal (X) -->
+      <button id="closeFormBtn" class="close-modal">X</button>
+
+      <h3 id="formTitle">Add or Edit a Quote</h3>
+      <form id="quoteForm">
+        <label for="quoteText">Quote:</label>
+        <textarea id="quoteText" rows="3" required></textarea>
+
+        <label for="bookTitle">Book Title:</label>
+        <input type="text" id="bookTitle" required />
+
+        <label for="authorName">Author:</label>
+        <input type="text" id="authorName" required />
+
+        <!-- Form Footer for Save/Discard -->
+        <div class="form-footer">
+          <button type="submit" id="saveBtn">Save</button>
+          <button type="button" id="discardBtn">Discard</button>
+        </div>
+      </form>
+    </div>
   </main>
 
   <script src="script.js"></script>

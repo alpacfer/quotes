@@ -1,287 +1,356 @@
-/* ----------------------
-   General Styles
------------------------ */
-* {
-    box-sizing: border-box;
+/* Root Variables */
+:root {
+    --background-color: #f5f5f5;   
+    --primary-color: #2c3e50;      
+    --accent-color: #f1c40f;       
+    --text-color: #333333;         
+    --secondary-text: #7f8c8d;     
+    --button-bg: #34495e;          
+    --button-hover: #3b5568;       
+    --danger-color: #c0392b;       
+    --danger-hover: #a93226;       
+    --box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Body */
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
     margin: 0;
     padding: 0;
-}
-
-:root {
-    --primary-color: #4CAF50;
-    --secondary-color: #66BB6A;
-    --danger-color: #f44336;
-    --warning-color: #FF9800;
-    --light-gray: #f4f4f4;
-    --text-color: #333;
-    --box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: var(--light-gray);
-    color: var(--text-color);
-}
-
-/* ----------------------
-   Header Nav
------------------------ */
-#topNav.hidden {
-    display: none;
-}
-
-.navbar {
+  }
+  
+  /* Hidden Class */
+  .hidden {
+    display: none !important;
+  }
+  
+  /****************************************************************
+   * Header Bar
+   ****************************************************************/
+  .navbar {
     display: flex;
     justify-content: center;
     align-items: center;
     background-color: var(--primary-color);
     padding: 10px;
-}
-
-.nav-button {
+  }
+  
+  .nav-button {
     margin: 0 10px;
     font-size: 16px;
     padding: 8px 14px;
     border: none;
     border-radius: 5px;
-    background-color: var(--secondary-color);
-    color: #fff;
+    background-color: transparent; /* No distinct box by default */
+    color: #ffffff;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
-
-.nav-button:hover {
-    background-color: #388E3C;
-}
-
-/* ----------------------
-   Main Menu
------------------------ */
-#mainMenu {
+  }
+  
+  .nav-button:hover {
+    background-color: var(--button-bg);
+  }
+  
+  /****************************************************************
+   * Pages & Layout
+   ****************************************************************/
+  #mainMenu,
+  #quotesPage,
+  #authorsPage,
+  #booksPage {
+    padding: 20px;
+    max-width: 1000px;
+    margin: 0 auto;
+    position: relative;
+  }
+  
+  /* Improve Home Page Look */
+  #mainMenu h1 {
     text-align: center;
-    padding: 30px;
-}
-
-#mainMenu h2 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+    font-size: 2rem;
+  }
+  
+  #mainMenu p {
+    text-align: center;
+    color: var(--secondary-text);
     margin-bottom: 20px;
-}
-
-.menu {
+    font-size: 1.2rem;
+  }
+  
+  /****************************************************************
+   * Main Menu Buttons
+   ****************************************************************/
+  .menu {
     display: flex;
     justify-content: center;
     gap: 20px;
-    margin-top: 20px;
-}
-
-.menu-button {
+  }
+  
+  .menu-button {
     padding: 15px 30px;
     font-size: 18px;
     font-weight: bold;
     color: var(--primary-color);
-    background-color: white;
+    background-color: #ffffff;
     border: 2px solid var(--primary-color);
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-.menu-button:hover {
+  }
+  
+  .menu-button:hover {
     background-color: var(--primary-color);
-    color: white;
-}
-
-/* ----------------------
-   Hidden Class
------------------------ */
-.hidden {
-    display: none;
-}
-
-/* ----------------------
-   Quotes Page
------------------------ */
-#quotesPage {
-    padding: 20px;
-}
-
-#addQuoteMenu {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: var(--box-shadow);
-    max-width: 600px;
-    margin: 20px auto;
-}
-
-#addQuoteMenu h3 {
-    margin-top: 0;
-    color: var(--primary-color);
-}
-
-form {
+    color: #ffffff;
+  }
+  
+  /****************************************************************
+   * Quotes Title & Add Button
+   ****************************************************************/
+  .quotes-header {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-form label {
-    font-weight: bold;
-}
-
-form input,
-form textarea,
-form button {
-    padding: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-form input:focus,
-form textarea:focus {
-    border-color: var(--primary-color);
-    outline: none;
-}
-
-form button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-}
-
-form button:hover {
-    background-color: #45a049;
-}
-
-.quotes-grid {
-    max-width: 1000px;
-    margin: 20px auto;
+    align-items: center;
+    justify-content: space-between;
+    /* So "Quotes" is on left, "+" on right */
+  }
+  
+  .quotes-header h2 {
+    margin: 0; /* Reset default margin for neat alignment */
+  }
+  
+  /****************************************************************
+   * Add Quote Button (+)
+   ****************************************************************/
+  #addQuoteToggle {
+    font-size: 24px; /* Bigger for + icon */
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
     text-align: center;
-}
-
-.grid {
+    border: none;
+    border-radius: 50%;
+    background-color: var(--button-bg);
+    color: #ffffff;
+    cursor: pointer;
+    box-shadow: var(--box-shadow);
+    transition: background-color 0.3s ease;
+  }
+  
+  #addQuoteToggle:hover {
+    background-color: var(--button-hover);
+  }
+  
+  /****************************************************************
+   * Quotes Grid
+   ****************************************************************/
+  .quotes-grid {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
-    margin-top: 20px;
-}
-
-.quote-card {
-    background-color: white;
-    border: 1px solid #ccc;
+  }
+  
+  /****************************************************************
+   * Quote Card
+   ****************************************************************/
+  .quote-card {
+    background-color: #ffffff;
+    border: 1px solid var(--secondary-text);
     border-radius: 5px;
     padding: 15px;
     box-shadow: var(--box-shadow);
-    position: relative;
-}
-
-.quote-card p {
-    font-style: italic;
-    color: #555;
-    line-height: 1.5;
-}
-
-.quote-card h3 {
-    margin-top: 10px;
-    font-size: 16px;
-    color: var(--text-color);
-}
-
-.quote-card .actions {
-    margin-top: 15px;
-    display: flex;
-    justify-content: space-between;
-}
-
-.quote-card button {
-    padding: 5px 10px;
-    font-size: 14px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
+    position: relative; /* For absolutely positioned icons inside */
     transition: background-color 0.3s ease;
-}
-
-.quote-card .edit-btn {
-    background-color: var(--warning-color);
-    color: white;
-}
-
-.quote-card .edit-btn:hover {
-    background-color: #F57C00;
-}
-
-.quote-card .delete-btn {
+  }
+  
+  /* Edit and Delete Buttons (hidden by default) */
+  .quote-card .actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: none; /* Shown on hover */
+    gap: 5px;
+  }
+  
+  .quote-card:hover .actions {
+    display: flex; /* Appear on hover */
+  }
+  
+  /* Pen & Trash Buttons */
+  .quote-card button {
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+  }
+  
+  .edit-btn {
+    background-color: var(--accent-color);
+  }
+  
+  .edit-btn:hover {
+    background-color: #d4ac0d;
+  }
+  
+  .delete-btn {
     background-color: var(--danger-color);
-    color: white;
-}
-
-.quote-card .delete-btn:hover {
-    background-color: #d32f2f;
-}
-
-/* ----------------------
-   Authors Page
------------------------ */
-#authorsPage {
+  }
+  
+  .delete-btn:hover {
+    background-color: var(--danger-hover);
+  }
+  
+  .quote-card p {
+    font-style: italic;
+    color: var(--secondary-text);
+    margin-top: 10px;
+  }
+  
+  .quote-card h3 {
+    font-size: 16px;
+    color: var(--primary-color);
+    margin-top: 10px;
+  }
+  
+  /****************************************************************
+   * Modal
+   ****************************************************************/
+  .modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    border-radius: 5px;
+    box-shadow: var(--box-shadow);
+    width: 90%;
+    max-width: 600px;
     padding: 20px;
-}
-
-.authors-list {
-    max-width: 600px;
-    margin: 20px auto;
+    z-index: 1000;
+  }
+  
+  .close-modal {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: transparent;
+    color: var(--primary-color);
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  
+  /****************************************************************
+   * Form
+   ****************************************************************/
+  #quoteForm {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-bottom: 60px; /* Space for footer at bottom */
+  }
+  
+  #quoteForm label {
+    font-weight: bold;
+    color: var(--text-color);
+  }
+  
+  #quoteForm textarea,
+  #quoteForm input {
+    font-size: 16px;
+    border: 1px solid var(--secondary-text);
+    border-radius: 5px;
+    padding: 10px;
+  }
+  
+  #quoteForm textarea:focus,
+  #quoteForm input:focus {
+    outline: none;
+    border-color: var(--accent-color);
+  }
+  
+  /****************************************************************
+   * Form Footer (Save left, Discard right)
+   ****************************************************************/
+  .form-footer {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    flex-direction: row;
+    gap: 15px; /* Increase spacing between buttons */
+  }
+  
+  .form-footer button {
+    width: 100px; /* Same width for both */
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+  
+  #saveBtn {
+    background-color: var(--primary-color);
+    color: #ffffff;
+  }
+  
+  #saveBtn:hover {
+    background-color: var(--button-hover);
+  }
+  
+  #discardBtn {
+    background-color: var(--secondary-text);
+    color: #ffffff;
+  }
+  
+  #discardBtn:hover {
+    background-color: #95a5a6;
+  }
+  
+  /****************************************************************
+   * Authors & Books
+   ****************************************************************/
+  .authors-list,
+  .books-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
-}
-
-.author-card {
-    background-color: white;
-    border: 1px solid #ccc;
+  }
+  
+  .author-card,
+  .book-card {
+    background-color: #ffffff;
+    border: 1px solid var(--secondary-text);
     border-radius: 5px;
     padding: 15px;
     box-shadow: var(--box-shadow);
-}
-
-.author-card h3 {
+  }
+  
+  .author-card h3,
+  .book-card h3 {
     margin: 0;
     color: var(--primary-color);
-}
-
-.author-card p {
+  }
+  
+  .author-card p,
+  .book-card p {
     margin: 5px 0;
     line-height: 1.5;
-    color: #555;
-}
-
-/* ----------------------
-   Books Page
------------------------ */
-.books-list {
-    max-width: 600px;
-    margin: 20px auto;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.book-card {
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 15px;
-    box-shadow: var(--box-shadow);
-}
-
-.book-card h3 {
-    margin: 0;
-    color: var(--primary-color);
-}
-
-.book-card p {
-    margin: 5px 0;
-    line-height: 1.5;
-    color: #555;
-}
+    color: var(--secondary-text);
+  }
+  

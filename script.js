@@ -22,19 +22,22 @@ const quoteForm = document.getElementById("quoteForm");
 const quotesGrid = document.querySelector(".grid");
 const authorsList = document.getElementById("authorsList");
 
+const booksPage = document.getElementById("booksPage");
+const booksList = document.getElementById("booksList");
+
 /* ---------------
    Event Listeners
 ----------------- */
 // Main Menu Buttons
 quotesMenuBtn.addEventListener("click", showQuotesPage);
 authorsMenuBtn.addEventListener("click", showAuthorsPage);
-booksMenuMainBtn.addEventListener("click", notImplementedAlert);
+booksMenuMainBtn.addEventListener("click", showBooksPage);
 
 // Top Nav Buttons
 homeBtn.addEventListener("click", showMainMenu);
 quotesNavBtn.addEventListener("click", showQuotesPage);
 authorsNavBtn.addEventListener("click", showAuthorsPage);
-booksNavBtn.addEventListener("click", notImplementedAlert);
+booksNavBtn.addEventListener("click", showBooksPage);
 
 // Add Quote Form
 quoteForm.addEventListener("submit", addQuote);
@@ -43,37 +46,38 @@ quoteForm.addEventListener("submit", addQuote);
    Navigation
 ----------------- */
 function showMainMenu() {
-  // Hide pages
   quotesPage.classList.add("hidden");
   authorsPage.classList.add("hidden");
-  // Show Main Menu
+  booksPage.classList.add("hidden");
   mainMenu.classList.remove("hidden");
-  // Hide top nav
   topNav.classList.add("hidden");
 }
 
 function showQuotesPage() {
   mainMenu.classList.add("hidden");
   authorsPage.classList.add("hidden");
+  booksPage.classList.add("hidden");
   quotesPage.classList.remove("hidden");
-  // Show top nav
   topNav.classList.remove("hidden");
-
   renderQuotes();
 }
 
 function showAuthorsPage() {
   mainMenu.classList.add("hidden");
   quotesPage.classList.add("hidden");
+  booksPage.classList.add("hidden");
   authorsPage.classList.remove("hidden");
-  // Show top nav
   topNav.classList.remove("hidden");
-
   renderAuthors();
 }
 
-function notImplementedAlert() {
-  alert("Feature not yet implemented.");
+function showBooksPage() {
+  mainMenu.classList.add("hidden");
+  quotesPage.classList.add("hidden");
+  authorsPage.classList.add("hidden");
+  booksPage.classList.remove("hidden");
+  topNav.classList.remove("hidden");
+  renderBooks();
 }
 
 /* ---------------
@@ -92,7 +96,7 @@ function addQuote(e) {
   }
 
   const newQuote = {
-    id: Date.now(),
+    id: crypto.randomUUID(),
     quoteText,
     bookTitle,
     authorName
@@ -101,10 +105,7 @@ function addQuote(e) {
   quotes.push(newQuote);
   saveQuotes();
 
-  // Clear form
   quoteForm.reset();
-
-  // Stay on Quotes page and re-render
   renderQuotes();
 }
 
@@ -122,7 +123,7 @@ function renderQuotes() {
 
     const quotePreview =
       quote.quoteText.length > 50
-        ? quote.quoteText.substring(0, 50) + "..."
+        ? quote.quoteText.substring(0, 50).split(" ").slice(0, -1).join(" ") + "..."
         : quote.quoteText;
 
     card.innerHTML = `
@@ -154,7 +155,7 @@ function attachQuoteEventListeners() {
 }
 
 function deleteQuote(e) {
-  const quoteId = Number(e.target.getAttribute("data-id"));
+  const quoteId = e.target.getAttribute("data-id");
   if (confirm("Are you sure you want to delete this quote?")) {
     quotes = quotes.filter((quote) => quote.id !== quoteId);
     saveQuotes();
@@ -163,7 +164,7 @@ function deleteQuote(e) {
 }
 
 function editQuote(e) {
-  const quoteId = Number(e.target.getAttribute("data-id"));
+  const quoteId = e.target.getAttribute("data-id");
   const quoteToEdit = quotes.find((q) => q.id === quoteId);
 
   if (!quoteToEdit) {
@@ -171,15 +172,11 @@ function editQuote(e) {
     return;
   }
 
-  // Populate form
   document.getElementById("quoteText").value = quoteToEdit.quoteText;
   document.getElementById("bookTitle").value = quoteToEdit.bookTitle;
   document.getElementById("authorName").value = quoteToEdit.authorName;
 
-  // Remove original
-  quotes = quotes.filter((q) => q.id !== quoteId);
-  saveQuotes();
-  renderQuotes();
+  deleteQuote({ target: { getAttribute: () => quoteId } });
 }
 
 function saveQuotes() {
@@ -197,30 +194,67 @@ function renderAuthors() {
     return;
   }
 
-  // Count quotes by author
   const authorsMap = quotes.reduce((acc, quote) => {
-    const author = quote.authorName.trim();
+    const author = quote.authorName.trim().toLowerCase();
+    const book = quote.bookTitle.trim();
+
     if (author) {
-      acc[author] = (acc[author] || 0) + 1;
+      if (!acc[author]) {
+        acc[author] = { name: quote.authorName, quoteCount: 0, books: new Set() };
+      }
+      acc[author].quoteCount++;
+      acc[author].books.add(book);
     }
+
     return acc;
   }, {});
 
-  // Sort authors by name
-  const sortedAuthors = Object.keys(authorsMap).sort();
-
-  sortedAuthors.forEach((authorName) => {
-    const count = authorsMap[authorName];
-
+  Object.values(authorsMap).sort((a, b) => a.name.localeCompare(b.name)).forEach(({ name, quoteCount, books }) => {
     const card = document.createElement("div");
     card.classList.add("author-card");
 
     card.innerHTML = `
-      <h3>${authorName}</h3>
-      <p>${count} ${count === 1 ? "quote" : "quotes"}</p>
+      <h3>${name}</h3>
+      <p>${quoteCount} ${quoteCount === 1 ? "quote" : "quotes"}</p>
+      <p>${books.size} ${books.size === 1 ? "book" : "books"}</p>
     `;
 
     authorsList.appendChild(card);
+  });
+}
+
+function renderBooks() {
+  booksList.innerHTML = "";
+
+  if (quotes.length === 0) {
+    booksList.innerHTML = "<p>No books to display.</p>";
+    return;
+  }
+
+  const booksMap = quotes.reduce((acc, quote) => {
+    const book = quote.bookTitle.trim().toLowerCase();
+
+    if (book) {
+      if (!acc[book]) {
+        acc[book] = { title: quote.bookTitle, author: quote.authorName, quoteCount: 0 };
+      }
+      acc[book].quoteCount++;
+    }
+
+    return acc;
+  }, {});
+
+  Object.values(booksMap).sort((a, b) => a.title.localeCompare(b.title)).forEach(({ title, author, quoteCount }) => {
+    const card = document.createElement("div");
+    card.classList.add("book-card");
+
+    card.innerHTML = `
+      <h3>${title}</h3>
+      <p>By ${author}</p>
+      <p>${quoteCount} ${quoteCount === 1 ? "quote" : "quotes"}</p>
+    `;
+
+    booksList.appendChild(card);
   });
 }
 
@@ -228,6 +262,5 @@ function renderAuthors() {
    On Page Load
 ----------------- */
 document.addEventListener("DOMContentLoaded", () => {
-  // Show main menu by default
   showMainMenu();
 });

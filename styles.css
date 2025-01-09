@@ -1,0 +1,250 @@
+/* ----------------------
+   General Styles
+----------------------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+  }
+  
+  /* ----------------------
+     Header Nav
+  ----------------------- */
+  #topNav.hidden {
+    display: none;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #4CAF50;
+    padding: 10px;
+  }
+  
+  .nav-button {
+    margin: 0 10px;
+    font-size: 16px;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 5px;
+    background-color: #66BB6A;
+    color: #fff;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background-color: #388E3C;
+  }
+  
+  /* ----------------------
+     Main Menu
+  ----------------------- */
+  #mainMenu {
+    text-align: center;
+    padding: 30px;
+  }
+  
+  #mainMenu h2 {
+    margin-bottom: 20px;
+  }
+  
+  .menu {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .menu-button {
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    color: #4CAF50;
+    background-color: white;
+    border: 2px solid #4CAF50;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .menu-button:hover {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  /* ----------------------
+     Hidden Class
+  ----------------------- */
+  .hidden {
+    display: none;
+  }
+  
+  /* ----------------------
+     Quotes Page
+  ----------------------- */
+  #quotesPage {
+    padding: 20px;
+  }
+  
+  #addQuoteMenu {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px
+      rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 20px auto;
+  }
+  
+  #addQuoteMenu h3 {
+    margin-top: 0;
+    color: #4CAF50;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  form label {
+    font-weight: bold;
+  }
+  
+  form input,
+  form textarea,
+  form button {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  form input:focus,
+  form textarea:focus {
+    border-color: #4CAF50;
+    outline: none;
+  }
+  
+  form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+  }
+  
+  form button:hover {
+    background-color: #45a049;
+  }
+  
+  .quotes-grid {
+    max-width: 1000px;
+    margin: 20px auto;
+    text-align: center;
+  }
+  
+  .grid {
+    display: grid;
+    grid-template-columns:
+      repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .quote-card {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 2px 2px 5px
+      rgba(0, 0, 0, 0.1);
+    position: relative;
+  }
+  
+  .quote-card p {
+    font-style: italic;
+    color: #555;
+  }
+  
+  .quote-card h3 {
+    margin-top: 10px;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .quote-card .actions {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .quote-card button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .quote-card .edit-btn {
+    background-color: #FF9800;
+    color: white;
+  }
+  
+  .quote-card .edit-btn:hover {
+    background-color: #F57C00;
+  }
+  
+  .quote-card .delete-btn {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .quote-card .delete-btn:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* ----------------------
+     Authors Page
+  ----------------------- */
+  #authorsPage {
+    padding: 20px;
+  }
+  
+  .authors-list {
+    max-width: 600px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .author-card {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 2px 2px 5px
+      rgba(0, 0, 0, 0.1);
+  }
+  
+  .author-card h3 {
+    margin: 0;
+    color: #4CAF50;
+  }
+  
+  .author-card p {
+    margin: 5px 0 0;
+    color: #555;
+  }
+  

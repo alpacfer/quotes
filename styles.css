@@ -78,7 +78,9 @@ body {
 #mainMenu,
 #quotesPage,
 #authorsPage,
-#booksPage {
+#booksPage,
+#authorDetailPage,
+#bookDetailPage {
   padding: 20px;
   max-width: 1000px;
   margin: 0 auto;
@@ -185,8 +187,8 @@ body {
 /****************************************************************
  * Quote Card
  ****************************************************************/
-.quote-card {
-  background-color: #ffffff;
+ .quote-card {
+  background-color: #ffffff; /* Ensure a clean white background */
   border: 1px solid var(--secondary-text);
   border-radius: 5px;
   padding: 20px;
@@ -194,19 +196,25 @@ body {
   position: relative; /* For absolutely positioned icons inside */
   transition: background-color 0.3s ease;
   cursor: pointer; /* Make entire card clickable for viewing */
-  text-align: left; /* Left align all text within the card */
+  text-align: left; /* Ensure all text is left-aligned */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 170px; /* Fixed height for consistency */
+  overflow: hidden; /* Hide overflowing content */
 }
 
 .quote-card:hover {
-  background-color: #f0f0f0;
+  background-color: #f0f0f0; /* Slightly lighter background on hover */
 }
 
 .quote-card .actions {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  bottom: 10px;
+  right: 10px;
   display: none; /* Shown on hover */
   gap: 10px;
+  /* Overlay buttons without affecting content layout */
 }
 
 .quote-card:hover .actions {
@@ -252,19 +260,38 @@ body {
   background-color: var(--danger-hover);
 }
 
-.quote-card p {
-  font-style: italic;
+/* Quote Text */
+.quote-text {
+  font-size: 0.9rem;
   color: var(--secondary-text);
-  margin: 15px 0;
-  max-height: 100px;
-  overflow-y: auto; /* Make scrollable if too long */
+  margin-bottom: auto; /* Push the title and author down */
+  text-align: justify; /* Justify the text for better alignment */
+  overflow: hidden;
+  text-overflow: ellipsis; /* Keep truncation intact */
+  display: -webkit-box; /* For multiline truncation */
+  -webkit-line-clamp: 4; /* Limit to 4 lines */
+  -webkit-box-orient: vertical;
 }
 
-.quote-card h3 {
-  font-size: 16px;
+/* Book Title */
+.quote-book {
+  font-weight: bold;
   color: var(--primary-color);
-  margin-top: 0;
+  margin: 10px 0 5px; /* Closer spacing to the author */
+  font-size: 1.1rem;
+  text-align: left; /* Ensure title is left-aligned */
 }
+
+/* Author Name */
+.quote-author {
+  font-weight: bold;
+  color: var(--primary-color);
+  font-size: 1rem;
+  margin: 0; /* No extra margin */
+  text-align: left; /* Ensure author is left-aligned */
+}
+
+
 
 /****************************************************************
  * Modal
@@ -449,7 +476,7 @@ body {
 /****************************************************************
  * View Quote Modal
  ****************************************************************/
-#viewQuoteModal {
+ #viewQuoteModal {
   /* Reuse common modal styles */
   position: fixed;
   top: 50%;
@@ -461,28 +488,35 @@ body {
   width: 90%;
   max-width: 600px;
   padding: 25px;
-  text-align: center;
+  text-align: left; /* Align content to the left */
   z-index: 1000;
 }
 
-#viewQuoteModal .view-content {
-  margin-bottom: 20px;
+.view-content {
+  max-height: 300px; /* Set max height for content */
+  overflow-y: auto; /* Enable scrolling for long content */
+  padding-right: 10px; /* Add padding for scrollbar */
 }
 
-#viewQuoteModal p {
-  font-style: italic;
+.view-content p {
+  font-size: 1rem;
   color: var(--secondary-text);
-  font-size: 1.2rem;
-  max-height: 300px;
-  overflow-y: auto; /* Scrollable if too long */
-  text-align: left; /* Left align the quote text */
+  margin-bottom: 15px;
+  text-align: justify; /* Justify the quote text */
 }
 
-#viewQuoteModal h3 {
-  font-size: 1.1rem;
+.view-content .quote-book {
+  font-weight: bold;
   color: var(--primary-color);
-  margin-top: 10px;
-  text-align: left; /* Left align the title and author */
+  font-size: 1.1rem;
+  margin: 5px 0; /* Reduce vertical space */
+}
+
+.view-content .quote-author {
+  font-weight: bold;
+  color: var(--primary-color);
+  font-size: 1rem;
+  margin: 0; /* Remove vertical spacing */
 }
 
 /* Buttons inside View Quote Modal */
@@ -527,13 +561,29 @@ body {
   margin-right: 5px;
 }
 
+/* Optional: Custom Scrollbar for View Content */
+.view-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.view-content::-webkit-scrollbar-thumb {
+  background-color: var(--secondary-text);
+  border-radius: 4px;
+}
+
+.view-content::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-color);
+}
+
+
 /****************************************************************
  * Authors & Books
  ****************************************************************/
 .authors-list,
-.books-list {
-  display: flex;
-  flex-direction: column;
+.books-list,
+.authorBooksList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 15px;
 }
 
@@ -550,6 +600,7 @@ body {
 .book-card h3 {
   margin: 0;
   color: var(--primary-color);
+  font-size: 1.2rem;
 }
 
 .author-card p,
@@ -557,6 +608,37 @@ body {
   margin: 5px 0;
   line-height: 1.5;
   color: var(--secondary-text);
+  font-size: 1rem;
+}
+
+.author-card:hover,
+.book-card:hover {
+  background-color: #f0f0f0;
+  cursor: pointer;
+}
+
+/****************************************************************
+ * Back Button
+ ****************************************************************/
+.back-button {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
+}
+
+.back-button:hover {
+  background-color: var(--button-hover);
+}
+
+.back-button .material-icons {
+  margin-right: 5px;
 }
 
 /****************************************************************

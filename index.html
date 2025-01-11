@@ -4,16 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>My Quotes Website</title>
-  
+
   <!-- Google Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  
+
   <!-- Link to your CSS -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <!-- Header Bar (Visible on All Pages Except Main Menu) -->
-  <header id="topNav">
+  <header id="topNav" class="hidden">
     <nav class="navbar">
       <div class="nav-left">
         <button id="homeBtn" class="nav-button" title="Home">
@@ -85,6 +85,37 @@
       <div id="booksList" class="books-list"></div>
     </div>
 
+    <!-- Author Detail Page -->
+    <div id="authorDetailPage" class="hidden">
+      <button id="backFromAuthorDetail" class="back-button">
+        <span class="material-icons">arrow_back</span> Back to Authors
+      </button>
+      <div class="author-detail-content">
+        <h2 id="authorNameDetail"></h2>
+        <h3>Books:</h3>
+        <div id="authorBooksList" class="books-list"></div>
+        <h3>Quotes:</h3>
+        <div id="authorQuotesGrid" class="quotes-grid">
+          <div class="grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Book Detail Page -->
+    <div id="bookDetailPage" class="hidden">
+      <button id="backFromBookDetail" class="back-button">
+        <span class="material-icons">arrow_back</span> Back to Books
+      </button>
+      <div class="book-detail-content">
+        <h2 id="bookTitleDetail"></h2>
+        <h4 id="bookAuthorDetail"></h4>
+        <h3>Quotes:</h3>
+        <div id="bookQuotesGrid" class="quotes-grid">
+          <div class="grid"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Modal for Add/Edit Quote -->
     <div id="addQuoteMenu" class="modal hidden">
       <!-- Close Modal (X) -->
@@ -133,7 +164,10 @@
 
       <div class="view-content">
         <p id="viewQuoteText"></p>
-        <h3 id="viewQuoteDetails"></h3>
+        <div class="view-details">
+          <p id="viewQuoteBook" class="quote-book"></p>
+          <p id="viewQuoteAuthor" class="quote-author"></p>
+        </div>
       </div>
       <div class="form-footer">
         <button id="viewEditBtn">

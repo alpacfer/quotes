@@ -1,15 +1,16 @@
 /* Root Variables */
 :root {
-  --background-color: #f5f5f5;   
-  --primary-color: #2c3e50;      
-  --accent-color: #f1c40f;       
-  --text-color: #333333;         
-  --secondary-text: #7f8c8d;     
-  --button-bg: #34495e;          
-  --button-hover: #3b5568;       
-  --danger-color: #c0392b;       
-  --danger-hover: #a93226;       
+  --background-color: #f5f5f5;
+  --primary-color: #2c3e50;
+  --accent-color: #f1c40f;
+  --text-color: #333333;
+  --secondary-text: #7f8c8d;
+  --button-bg: #34495e;
+  --button-hover: #3b5568;
+  --danger-color: #c0392b;
+  --danger-hover: #a93226;
   --box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  --modal-overlay-bg: rgba(0, 0, 0, 0.5);
 }
 
 /* Body */
@@ -19,11 +20,16 @@ body {
   color: var(--text-color);
   margin: 0;
   padding: 0;
+  overflow: overlay;
 }
 
 /* Hidden Class */
 .hidden {
   display: none !important;
+}
+
+html {
+  overflow-y: scroll; /* Always show vertical scrollbar */
 }
 
 /****************************************************************
@@ -34,7 +40,7 @@ body {
   align-items: center;
   background-color: var(--primary-color);
   padding: 10px 20px;
-  justify-content: space-between; /* Space between left and right */
+  justify-content: space-between;
 }
 
 .nav-left,
@@ -46,11 +52,11 @@ body {
 .nav-left .nav-button,
 .nav-right .nav-button {
   margin: 0 10px;
-  font-size: 24px; /* Increased for better visibility */
+  font-size: 24px;
   padding: 8px 14px;
   border: none;
   border-radius: 5px;
-  background-color: transparent; /* No distinct box by default */
+  background-color: transparent;
   color: #ffffff;
   cursor: pointer;
   transition: background-color 0.3s ease;
@@ -64,12 +70,12 @@ body {
 }
 
 .nav-button .material-icons {
-  font-size: 24px; /* Ensure icons are visible */
-  margin-right: 5px; /* Space between icon and text */
+  font-size: 24px;
+  margin-right: 5px;
 }
 
 .nav-right .nav-button .material-icons {
-  margin-right: 0; /* No text, so no margin */
+  margin-right: 0;
 }
 
 /****************************************************************
@@ -80,14 +86,15 @@ body {
 #authorsPage,
 #booksPage,
 #authorDetailPage,
-#bookDetailPage {
+#bookDetailPage,
+#searchPage {
   padding: 20px;
   max-width: 1000px;
   margin: 0 auto;
   position: relative;
 }
 
-/* Improve Home Page Look */
+/* Home Page Look */
 #mainMenu h1 {
   text-align: center;
   color: var(--primary-color);
@@ -142,17 +149,17 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px; /* Space below header */
+  margin-bottom: 20px;
 }
 
 .quotes-header h2 {
-  margin: 0; /* Reset default margin for neat alignment */
+  margin: 0;
   font-size: 2rem;
   color: var(--primary-color);
 }
 
 .quotes-header #addQuoteToggle {
-  font-size: 28px; /* Bigger for + icon */
+  font-size: 28px;
   width: 50px;
   height: 50px;
   border: none;
@@ -178,7 +185,7 @@ body {
   text-align: center;
 }
 
-.grid {
+.quotes-grid .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: 25px;
@@ -187,34 +194,33 @@ body {
 /****************************************************************
  * Quote Card
  ****************************************************************/
- .quote-card {
-  background-color: #ffffff; /* Ensure a clean white background */
+.quote-card {
+  background-color: #ffffff;
   border: 1px solid var(--secondary-text);
   border-radius: 5px;
   padding: 20px;
   box-shadow: var(--box-shadow);
-  position: relative; /* For absolutely positioned icons inside */
+  position: relative;
   transition: background-color 0.3s ease;
-  cursor: pointer; /* Make entire card clickable for viewing */
-  text-align: left; /* Ensure all text is left-aligned */
+  cursor: pointer;
+  text-align: left;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 170px; /* Fixed height for consistency */
-  overflow: hidden; /* Hide overflowing content */
+  height: 170px;
+  overflow: hidden;
 }
 
 .quote-card:hover {
-  background-color: #f0f0f0; /* Slightly lighter background on hover */
+  background-color: #f0f0f0;
 }
 
 .quote-card .actions {
   position: absolute;
   bottom: 10px;
   right: 10px;
-  display: none; /* Shown on hover */
+  display: none;
   gap: 10px;
-  /* Overlay buttons without affecting content layout */
 }
 
 .quote-card:hover .actions {
@@ -264,12 +270,12 @@ body {
 .quote-text {
   font-size: 0.9rem;
   color: var(--secondary-text);
-  margin-bottom: auto; /* Push the title and author down */
-  text-align: justify; /* Justify the text for better alignment */
+  margin-bottom: auto;
+  text-align: justify;
   overflow: hidden;
-  text-overflow: ellipsis; /* Keep truncation intact */
-  display: -webkit-box; /* For multiline truncation */
-  -webkit-line-clamp: 4; /* Limit to 4 lines */
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
 }
 
@@ -277,9 +283,15 @@ body {
 .quote-book {
   font-weight: bold;
   color: var(--primary-color);
-  margin: 10px 0 5px; /* Closer spacing to the author */
+  margin: 10px 0 5px;
   font-size: 1.1rem;
-  text-align: left; /* Ensure title is left-aligned */
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.quote-book:hover {
+  text-decoration: underline;
 }
 
 /* Author Name */
@@ -287,17 +299,33 @@ body {
   font-weight: bold;
   color: var(--primary-color);
   font-size: 1rem;
-  margin: 0; /* No extra margin */
-  text-align: left; /* Ensure author is left-aligned */
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
 }
 
+.quote-author:hover {
+  text-decoration: underline;
+}
 
+/****************************************************************
+ * Modal Overlay
+ ****************************************************************/
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--modal-overlay-bg);
+  z-index: 999; 
+}
 
 /****************************************************************
  * Modal
  ****************************************************************/
-/* Common Modal Styles */
-.modal {
+ .modal {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -306,25 +334,10 @@ body {
   border-radius: 10px;
   box-shadow: var(--box-shadow);
   width: 90%;
-  max-width: 600px; /* Make modal wider */
+  max-width: 600px;
   padding: 25px;
-  text-align: center;
+  text-align: left;
   z-index: 1000;
-}
-
-/* Close Button */
-.close-modal {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: transparent;
-  color: var(--primary-color);
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 /****************************************************************
@@ -354,15 +367,17 @@ body {
 }
 
 #quoteForm textarea {
-  resize: none; /* Fixed size */
-  height: 120px; /* Taller */
-  text-align: left; /* Left align text */
+  resize: none;
+  height: 120px;
+  text-align: left;
 }
 
+/* Remove blue focus styles */
 #quoteForm textarea:focus,
 #quoteForm input:focus {
   outline: none;
   border-color: var(--accent-color);
+  box-shadow: none;
 }
 
 /* Form Footer for Save & Discard Buttons */
@@ -370,16 +385,21 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 15px;
-  margin-top: 30px; /* Space above buttons */
+  margin-top: 30px;
 }
 
 .form-footer button {
-  width: 120px; /* Same width for both */
+  width: 120px;
   border: none;
   border-radius: 5px;
   padding: 10px;
   cursor: pointer;
   font-size: 16px;
+}
+
+.form-footer button:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 #saveBtn {
@@ -400,15 +420,11 @@ body {
   background-color: #95a5a6;
 }
 
+
 /****************************************************************
  * Confirm Deletion Modal
  ****************************************************************/
 #confirmDeleteModal {
-  /* Reuse common modal styles */
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   background-color: #ffffff;
   border-radius: 10px;
   box-shadow: var(--box-shadow);
@@ -431,7 +447,6 @@ body {
   font-size: 1.1rem;
 }
 
-/* Buttons inside Confirm Deletion Modal */
 #confirmDeleteModal .form-footer {
   display: flex;
   justify-content: center;
@@ -452,7 +467,7 @@ body {
 
 #deleteConfirmBtn {
   background-color: var(--danger-color);
-  color: #ffffff; /* White text for visibility */
+  color: #ffffff;
 }
 
 #deleteConfirmBtn:hover {
@@ -476,54 +491,74 @@ body {
 /****************************************************************
  * View Quote Modal
  ****************************************************************/
- #viewQuoteModal {
-  /* Reuse common modal styles */
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: #ffffff;
+#viewQuoteModal {
+  background-color: #ffffff; /* Neutral white background */
   border-radius: 10px;
-  box-shadow: var(--box-shadow);
+  box-shadow: var(--box-shadow); /* Use your existing shadow variable */
   width: 90%;
   max-width: 600px;
   padding: 25px;
-  text-align: left; /* Align content to the left */
+  text-align: left;
   z-index: 1000;
 }
 
 .view-content {
-  max-height: 300px; /* Set max height for content */
-  overflow-y: auto; /* Enable scrolling for long content */
-  padding-right: 10px; /* Add padding for scrollbar */
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 10px;
 }
 
 .view-content p {
   font-size: 1rem;
   color: var(--secondary-text);
   margin-bottom: 15px;
-  text-align: justify; /* Justify the quote text */
+  text-align: justify;
 }
 
-.view-content .quote-book {
+/* View Quote Modal: Title (Book) */
+.view-content .quote-book a {
+  font-size: 1.2rem; /* Slightly larger for the title */
   font-weight: bold;
   color: var(--primary-color);
-  font-size: 1.1rem;
-  margin: 5px 0; /* Reduce vertical space */
+  text-decoration: none;
+  margin: 0; /* Reduced bottom margin for less spacing */
+  display: inline;
+  cursor: pointer;
 }
 
-.view-content .quote-author {
-  font-weight: bold;
-  color: var(--primary-color);
+.view-content .quote-book a:hover {
+  text-decoration: underline; /* Underline on hover */
+  color: var(--primary-color); /* No color change on hover */
+}
+
+/* View Quote Modal: Author */
+.view-content .quote-author a {
   font-size: 1rem;
-  margin: 0; /* Remove vertical spacing */
+  font-weight: bold;
+  color: var(--primary-color);
+  text-decoration: none;
+  margin: 2px 0 0 0; /* No extra spacing above or below */
+  display: inline;
+  cursor: pointer;
 }
 
-/* Buttons inside View Quote Modal */
+.view-content .quote-author a:hover {
+  text-decoration: underline; /* Underline on hover */
+  color: var(--primary-color); /* No color change on hover */
+}
+
+.view-content .quote-book a:hover,
+.view-content .quote-author a:hover {
+  text-decoration: underline; /* Underline on hover */
+  color: var(--primary-color); /* Keep color consistent */
+}
+
+/* Modal footer buttons */
 #viewQuoteModal .form-footer {
   display: flex;
   justify-content: center;
   gap: 20px;
+  margin-top: 20px;
 }
 
 #viewQuoteModal .form-footer button {
@@ -538,30 +573,33 @@ body {
   justify-content: center;
 }
 
+/* Edit button styles */
 #viewEditBtn {
   background-color: var(--accent-color);
   color: #ffffff;
 }
 
 #viewEditBtn:hover {
-  background-color: #d4ac0d;
+  background-color: #d4ac0d; /* Adjusted hover color for better contrast */
 }
 
+/* Delete button styles */
 #viewDeleteBtn {
   background-color: var(--danger-color);
   color: #ffffff;
 }
 
 #viewDeleteBtn:hover {
-  background-color: var(--danger-hover);
+  background-color: var(--danger-hover); /* Define this variable if not already */
 }
 
+/* Button icons */
 #viewEditBtn .material-icons,
 #viewDeleteBtn .material-icons {
   margin-right: 5px;
 }
 
-/* Optional: Custom Scrollbar for View Content */
+/* Scrollbar customization for content */
 .view-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -573,6 +611,18 @@ body {
 
 .view-content::-webkit-scrollbar-thumb:hover {
   background-color: var(--primary-color);
+}
+
+/* Remove focus blue outline from buttons and links */
+#viewQuoteModal button:focus,
+#viewQuoteModal a:focus {
+  outline: none; /* Remove default browser outline */
+  box-shadow: none; /* Remove focus shadow */
+}
+
+/* Add hover state feedback for links */
+#viewQuoteModal a:hover {
+  text-decoration: underline; /* Ensure consistent hover behavior */
 }
 
 
@@ -587,6 +637,7 @@ body {
   gap: 15px;
 }
 
+/* For search results, ensure the same structure is used. */
 .author-card,
 .book-card {
   background-color: #ffffff;
@@ -594,21 +645,24 @@ body {
   border-radius: 5px;
   padding: 15px;
   box-shadow: var(--box-shadow);
+  text-align: left;
+  font-size: 0.9rem; /* Ensure consistent font size */
 }
 
 .author-card h3,
 .book-card h3 {
   margin: 0;
   color: var(--primary-color);
-  font-size: 1.2rem;
+  font-size: 1rem;
+  margin-bottom: 5px;
 }
 
 .author-card p,
 .book-card p {
-  margin: 5px 0;
-  line-height: 1.5;
+  margin: 3px 0;
+  line-height: 1.3;
   color: var(--secondary-text);
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 .author-card:hover,
@@ -642,6 +696,71 @@ body {
 }
 
 /****************************************************************
+ * Search Page
+ ****************************************************************/
+#searchPage {
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+#searchInput {
+  width: 100%;
+  max-width: 600px;
+  padding: 12px 20px;
+  font-size: 1rem;
+  border: 1px solid var(--secondary-text);
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+}
+
+#searchInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+.search-section {
+  margin-bottom: 30px;
+}
+
+.search-section > h3 { /* Make sure only direct children h3 are styled */
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+/* Hide search-section if no results */
+.search-section.hidden {
+  display: none;
+}
+
+.search-section .authors-list,
+.search-section .books-list,
+.search-section .quotes-grid .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+.search-section .quotes-grid {
+  text-align: center;
+}
+
+.search-section .quotes-grid .grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px;
+}
+
+/****************************************************************
  * Responsive Adjustments
  ****************************************************************/
 @media (max-width: 600px) {
@@ -669,13 +788,19 @@ body {
   }
 
   #confirmDeleteModal .form-footer,
-  #viewQuoteModal .form-footer {
+  #viewQuoteModal .form-footer,
+  #searchPage .form-footer {
     flex-direction: column;
     align-items: stretch;
   }
 
   #confirmDeleteModal .form-footer button,
-  #viewQuoteModal .form-footer button {
+  #viewQuoteModal .form-footer button,
+  #searchPage .form-footer button {
     width: 100%;
+  }
+
+  #searchInput {
+    max-width: 100%;
   }
 }

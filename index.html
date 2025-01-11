@@ -30,6 +30,10 @@
         </button>
       </div>
       <div class="nav-right">
+        <!-- Search Button -->
+        <button id="searchBtn" class="nav-button" title="Search">
+          <span class="material-icons">search</span>
+        </button>
         <button id="exportBtn" class="nav-button" title="Export Quotes">
           <span class="material-icons">file_download</span>
         </button>
@@ -68,7 +72,7 @@
           <span class="material-icons">add</span>
         </button>
       </div>
-      <div id="quotesGrid" class="quotes-grid">
+      <div class="quotes-grid">
         <div class="grid"></div>
       </div>
     </div>
@@ -95,7 +99,7 @@
         <h3>Books:</h3>
         <div id="authorBooksList" class="books-list"></div>
         <h3>Quotes:</h3>
-        <div id="authorQuotesGrid" class="quotes-grid">
+        <div class="quotes-grid" id="authorQuotesGrid">
           <div class="grid"></div>
         </div>
       </div>
@@ -110,18 +114,41 @@
         <h2 id="bookTitleDetail"></h2>
         <h4 id="bookAuthorDetail"></h4>
         <h3>Quotes:</h3>
-        <div id="bookQuotesGrid" class="quotes-grid">
+        <div class="quotes-grid" id="bookQuotesGrid">
           <div class="grid"></div>
         </div>
       </div>
     </div>
 
+    <!-- Search Page -->
+    <div id="searchPage" class="hidden">
+      <div class="search-header">
+        <input type="text" id="searchInput" placeholder="Search quotes, authors, or books..." />
+      </div>
+      <div id="searchResults" class="search-results">
+        <div id="searchAuthors" class="search-section hidden">
+          <h3>Authors</h3>
+          <div class="authors-list"></div>
+        </div>
+        <div id="searchBooks" class="search-section hidden">
+          <h3>Books</h3>
+          <div class="books-list"></div>
+        </div>
+        <div id="searchQuotes" class="search-section hidden">
+          <h3>Quotes</h3>
+          <div class="quotes-grid">
+            <div class="grid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Overlay (used for dark background) -->
+    <div id="modalOverlay" class="modal-overlay hidden"></div>
+
     <!-- Modal for Add/Edit Quote -->
-    <div id="addQuoteMenu" class="modal hidden">
-      <!-- Close Modal (X) -->
-      <button id="closeFormBtn" class="close-modal">
-        <span class="material-icons">close</span>
-      </button>
+    <div id="addQuoteMenu" class="modal hidden" data-backdrop="static">
+      <!-- Removed the close (X) button per instructions -->
 
       <form id="quoteForm">
         <label for="quoteText">Quote:</label>
@@ -133,7 +160,6 @@
         <label for="authorName">Author:</label>
         <input type="text" id="authorName" required />
 
-        <!-- Form Footer for Save/Discard Buttons -->
         <div class="form-footer">
           <button type="submit" id="saveBtn">Save</button>
           <button type="button" id="discardBtn">Discard</button>
@@ -157,11 +183,6 @@
 
     <!-- Modal for Viewing a Quote -->
     <div id="viewQuoteModal" class="modal hidden">
-      <!-- Close Modal (X) -->
-      <button id="closeViewModalBtn" class="close-modal">
-        <span class="material-icons">close</span>
-      </button>
-
       <div class="view-content">
         <p id="viewQuoteText"></p>
         <div class="view-details">

@@ -1,6 +1,4 @@
-/*******************************************************************
- * IndexedDB Setup
- ******************************************************************/
+/* IndexedDB Setup */
 let db = null;
 const DB_NAME = "QuotesDatabase";
 const DB_VERSION = 1;
@@ -75,8 +73,8 @@ function getAllQuotesFromDB() {
  ******************************************************************/
 let quotes = [];
 let editingQuoteId = null;
-let quoteToDeleteId = null; // Used for confirm deletion
-let currentViewQuoteId = null; // Used for viewing a quote
+let quoteToDeleteId = null;
+let currentViewQuoteId = null;
 
 /*******************************************************************
  * DOM Elements
@@ -93,6 +91,7 @@ const authorsPage = document.getElementById("authorsPage");
 const booksPage = document.getElementById("booksPage");
 const authorDetailPage = document.getElementById("authorDetailPage");
 const bookDetailPage = document.getElementById("bookDetailPage");
+const searchPage = document.getElementById("searchPage");
 
 const quotesMenuBtn = document.getElementById("quotesMenu");
 const authorsMenuBtn = document.getElementById("authorsMenu");
@@ -100,7 +99,6 @@ const booksMenuBtn = document.getElementById("booksMenu");
 
 const addQuoteToggle = document.getElementById("addQuoteToggle");
 const addQuoteMenu = document.getElementById("addQuoteMenu");
-const closeFormBtn = document.getElementById("closeFormBtn");
 const quoteForm = document.getElementById("quoteForm");
 const quoteTextInput = document.getElementById("quoteText");
 const bookTitleInput = document.getElementById("bookTitle");
@@ -116,9 +114,9 @@ const deleteConfirmBtn = document.getElementById("deleteConfirmBtn");
 const deleteCancelBtn = document.getElementById("deleteCancelBtn");
 
 const viewQuoteModal = document.getElementById("viewQuoteModal");
-const closeViewModalBtn = document.getElementById("closeViewModalBtn");
 const viewQuoteText = document.getElementById("viewQuoteText");
-const viewQuoteDetails = document.getElementById("viewQuoteDetails");
+const viewQuoteBook = document.getElementById("viewQuoteBook");
+const viewQuoteAuthor = document.getElementById("viewQuoteAuthor");
 const viewEditBtn = document.getElementById("viewEditBtn");
 const viewDeleteBtn = document.getElementById("viewDeleteBtn");
 
@@ -126,17 +124,26 @@ const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
 const importFileInput = document.getElementById("importFileInput");
 
-// Author Detail Page Elements
 const backFromAuthorDetail = document.getElementById("backFromAuthorDetail");
 const authorNameDetail = document.getElementById("authorNameDetail");
 const authorBooksList = document.getElementById("authorBooksList");
 const authorQuotesGrid = document.querySelector("#authorQuotesGrid .grid");
 
-// Book Detail Page Elements
 const backFromBookDetail = document.getElementById("backFromBookDetail");
 const bookTitleDetail = document.getElementById("bookTitleDetail");
 const bookAuthorDetail = document.getElementById("bookAuthorDetail");
 const bookQuotesGrid = document.querySelector("#bookQuotesGrid .grid");
+
+/* Search Page Elements */
+const searchBtn = document.getElementById("searchBtn");
+const searchPageElement = document.getElementById("searchPage");
+const searchInput = document.getElementById("searchInput");
+const searchAuthors = document.querySelector("#searchAuthors .authors-list");
+const searchBooks = document.querySelector("#searchBooks .books-list");
+const searchQuotesGrid = document.querySelector("#searchQuotes .quotes-grid .grid");
+
+/* Modal Overlay */
+const modalOverlay = document.getElementById("modalOverlay");
 
 /*******************************************************************
  * Event Listeners
@@ -152,13 +159,17 @@ quotesNavBtn.addEventListener("click", showQuotesPage);
 authorsNavBtn.addEventListener("click", showAuthorsPage);
 booksNavBtn.addEventListener("click", showBooksPage);
 
+// Search Button
+searchBtn.addEventListener("click", showSearchPage);
+
+// Search Input
+searchInput.addEventListener("input", handleSearchInput);
+
 // Add/Edit Quote Modal
 addQuoteToggle.addEventListener("click", () => {
-  // Only reset editingQuoteId if we're truly adding new
   editingQuoteId = null;
   openAddQuoteModal();
 });
-closeFormBtn.addEventListener("click", closeAddQuoteModal);
 discardBtn.addEventListener("click", () => {
   resetForm();
   closeAddQuoteModal();
@@ -170,11 +181,7 @@ deleteConfirmBtn.addEventListener("click", confirmDeletion);
 deleteCancelBtn.addEventListener("click", cancelDeletion);
 
 // View Quote Modal
-closeViewModalBtn.addEventListener("click", () => {
-  closeViewQuoteModal();
-});
 viewEditBtn.addEventListener("click", () => {
-  // Open Add/Edit modal with current quote data
   const quote = quotes.find(q => q.id === currentViewQuoteId);
   if (quote) {
     editingQuoteId = quote.id;
@@ -186,13 +193,9 @@ viewEditBtn.addEventListener("click", () => {
   }
 });
 viewDeleteBtn.addEventListener("click", () => {
-  // Trigger deletion via confirm deletion modal
   quoteToDeleteId = currentViewQuoteId;
-  confirmDeleteModal.classList.remove("hidden");
-  document.body.classList.add("modal-open");
-  // Close view modal
-  viewQuoteModal.classList.add("hidden");
-  currentViewQuoteId = null;
+  openConfirmDeleteModal();
+  closeViewQuoteModal();
 });
 
 // Export and Import
@@ -204,20 +207,18 @@ importFileInput.addEventListener("change", importQuotes);
 backFromAuthorDetail.addEventListener("click", showAuthorsPage);
 backFromBookDetail.addEventListener("click", showBooksPage);
 
-// Click outside modals to dismiss
+// Clicking outside the View Quote Modal or Confirm Delete Modal => close them
 window.addEventListener("click", (event) => {
-  if (event.target === addQuoteMenu) {
-    closeAddQuoteModal();
-    document.body.classList.remove("modal-open");
-  }
-  if (event.target === confirmDeleteModal) {
-    cancelDeletion();
-    document.body.classList.remove("modal-open");
-  }
-  if (event.target === viewQuoteModal) {
-    viewQuoteModal.classList.add("hidden");
-    currentViewQuoteId = null;
-    document.body.classList.remove("modal-open");
+  if (event.target === modalOverlay) {
+    // Close view quote modal if open
+    if (!viewQuoteModal.classList.contains("hidden")) {
+      closeViewQuoteModal();
+    }
+    // Close confirm delete modal if open
+    if (!confirmDeleteModal.classList.contains("hidden")) {
+      cancelDeletion();
+    }
+    // Do not close add/edit quote modal when clicking outside
   }
 });
 
@@ -231,10 +232,11 @@ function showMainMenu() {
   booksPage.classList.add("hidden");
   authorDetailPage.classList.add("hidden");
   bookDetailPage.classList.add("hidden");
+  searchPageElement.classList.add("hidden");
   topNav.classList.add("hidden");
 
-  // Hide + icon in main menu
   addQuoteToggle.classList.add("hidden");
+  hideOverlay(); // ensure overlay is hidden
 }
 
 function showQuotesPage() {
@@ -243,13 +245,12 @@ function showQuotesPage() {
   booksPage.classList.add("hidden");
   authorDetailPage.classList.add("hidden");
   bookDetailPage.classList.add("hidden");
+  searchPageElement.classList.add("hidden");
 
   quotesPage.classList.remove("hidden");
   topNav.classList.remove("hidden");
-
-  // Show + icon on the Quotes page
   addQuoteToggle.classList.remove("hidden");
-
+  hideOverlay();
   renderQuotes();
 }
 
@@ -259,11 +260,12 @@ function showAuthorsPage() {
   booksPage.classList.add("hidden");
   authorDetailPage.classList.add("hidden");
   bookDetailPage.classList.add("hidden");
+  searchPageElement.classList.add("hidden");
 
   authorsPage.classList.remove("hidden");
   topNav.classList.remove("hidden");
-
   addQuoteToggle.classList.add("hidden");
+  hideOverlay();
   renderAuthors();
 }
 
@@ -273,74 +275,147 @@ function showBooksPage() {
   authorsPage.classList.add("hidden");
   authorDetailPage.classList.add("hidden");
   bookDetailPage.classList.add("hidden");
+  searchPageElement.classList.add("hidden");
 
   booksPage.classList.remove("hidden");
   topNav.classList.remove("hidden");
-
   addQuoteToggle.classList.add("hidden");
+  hideOverlay();
   renderBooks();
+}
+
+/*******************************************************************
+ * Search Page Navigation
+ ******************************************************************/
+function showSearchPage() {
+  mainMenu.classList.add("hidden");
+  quotesPage.classList.add("hidden");
+  authorsPage.classList.add("hidden");
+  booksPage.classList.add("hidden");
+  authorDetailPage.classList.add("hidden");
+  bookDetailPage.classList.add("hidden");
+
+  searchPageElement.classList.remove("hidden");
+  topNav.classList.remove("hidden");
+  addQuoteToggle.classList.add("hidden");
+  hideOverlay();
+
+  clearSearch();
+  searchInput.focus();
+}
+
+/*******************************************************************
+ * Overlay Handling
+ ******************************************************************/
+function showOverlay() {
+  modalOverlay.classList.remove("hidden");
+}
+
+function hideOverlay() {
+  modalOverlay.classList.add("hidden");
 }
 
 /*******************************************************************
  * Modal Handling
  ******************************************************************/
 function openAddQuoteModal() {
-  // Show the Add/Edit quote modal
   addQuoteMenu.classList.remove("hidden");
-  document.body.classList.add("modal-open");
+  showOverlay();
+  // We do NOT allow clicking outside to dismiss
 }
 
 function closeAddQuoteModal() {
   addQuoteMenu.classList.add("hidden");
-  document.body.classList.remove("modal-open");
+  hideOverlay();
+}
+
+function openViewQuoteModal(id) {
+  const quote = quotes.find((q) => q.id === id);
+  if (!quote) {
+    alert("Quote not found.");
+    return;
+  }
+
+  currentViewQuoteId = id;
+
+  // Update modal content
+  viewQuoteText.textContent = quote.quoteText;
+  viewQuoteBook.innerHTML = `<a href="#" id="viewBookLink">${quote.bookTitle}</a>`;
+  viewQuoteAuthor.innerHTML = `<a href="#" id="viewAuthorLink">${quote.authorName}</a>`;
+
+  viewQuoteModal.classList.remove("hidden");
+  showOverlay();
+
+  // Event listeners for navigating to book and author pages
+  const viewBookLink = document.getElementById("viewBookLink");
+  const viewAuthorLink = document.getElementById("viewAuthorLink");
+
+  // Remove existing listeners to prevent duplicates
+  viewBookLink.replaceWith(viewBookLink.cloneNode(true));
+  viewAuthorLink.replaceWith(viewAuthorLink.cloneNode(true));
+
+  // Re-select after cloning
+  const newViewBookLink = document.getElementById("viewBookLink");
+  const newViewAuthorLink = document.getElementById("viewAuthorLink");
+
+  newViewBookLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    closeViewQuoteModal();
+    openBookDetailPage(quote.bookTitle);
+  });
+
+  newViewAuthorLink.addEventListener("click", (e) => {
+    e.preventDefault();
+    closeViewQuoteModal();
+    openAuthorDetailPage(quote.authorName);
+  });
 }
 
 function closeViewQuoteModal() {
   viewQuoteModal.classList.add("hidden");
-  currentViewQuoteId = null;
-  document.body.classList.remove("modal-open");
+  hideOverlay();
+}
+
+function openConfirmDeleteModal() {
+  confirmDeleteModal.classList.remove("hidden");
+  showOverlay();
+}
+
+function closeConfirmDeleteModal() {
+  confirmDeleteModal.classList.add("hidden");
+  hideOverlay();
 }
 
 /*******************************************************************
  * Confirm Deletion
  ******************************************************************/
 function confirmDeletion() {
-  // Close confirm deletion modal
-  confirmDeleteModal.classList.add("hidden");
-  document.body.classList.remove("modal-open");
+  closeConfirmDeleteModal();
 
   if (quoteToDeleteId) {
-    // Remove quote from memory
     quotes = quotes.filter((q) => q.id !== quoteToDeleteId);
-
-    // Remove from IndexedDB
     deleteQuoteFromDB(quoteToDeleteId).then(() => {
       renderQuotes();
       renderAuthors();
       renderBooks();
-      // If a view modal was open for this quote, close it
-      if (currentViewQuoteId === quoteToDeleteId) {
-        closeViewQuoteModal();
-      }
-      // Also update author and book detail pages if visible
+
       if (!authorDetailPage.classList.contains("hidden")) {
         openAuthorDetailPage(authorNameDetail.textContent);
       }
       if (!bookDetailPage.classList.contains("hidden")) {
         openBookDetailPage(bookTitleDetail.textContent);
       }
+      if (!searchPageElement.classList.contains("hidden")) {
+        performSearch(searchInput.value.trim());
+      }
     });
-
-    // Reset ID
     quoteToDeleteId = null;
   }
 }
 
 function cancelDeletion() {
-  // Reset and close modal without action
   quoteToDeleteId = null;
-  confirmDeleteModal.classList.add("hidden");
-  document.body.classList.remove("modal-open");
+  closeConfirmDeleteModal();
 }
 
 /*******************************************************************
@@ -361,7 +436,6 @@ async function saveQuote() {
     return;
   }
 
-  // If editingQuoteId is set, update existing
   if (editingQuoteId) {
     const index = quotes.findIndex((q) => q.id === editingQuoteId);
     if (index !== -1) {
@@ -369,16 +443,14 @@ async function saveQuote() {
       quotes[index].bookTitle = bookTitle;
       quotes[index].authorName = authorName;
       await updateQuoteInDB(quotes[index]);
-
-      // If viewing this quote, update view modal
       if (currentViewQuoteId === editingQuoteId) {
         viewQuoteText.textContent = quotes[index].quoteText;
-        viewQuoteDetails.textContent = `${quotes[index].bookTitle} ${quotes[index].authorName}`;
+        viewQuoteBook.textContent = quotes[index].bookTitle;
+        viewQuoteAuthor.textContent = quotes[index].authorName;
       }
     }
     editingQuoteId = null;
   } else {
-    // Otherwise, create a new quote
     const newQuote = {
       id: crypto.randomUUID(),
       quoteText,
@@ -395,12 +467,15 @@ async function saveQuote() {
   renderAuthors();
   renderBooks();
 
-  // If on a detail page, re-render to include the new quote
+  // Refresh detail pages if open
   if (!authorDetailPage.classList.contains("hidden")) {
     openAuthorDetailPage(authorName);
   }
   if (!bookDetailPage.classList.contains("hidden")) {
     openBookDetailPage(bookTitle);
+  }
+  if (!searchPageElement.classList.contains("hidden")) {
+    performSearch(searchInput.value.trim());
   }
 }
 
@@ -426,7 +501,6 @@ function createQuoteCard(quote) {
     <h3 class="quote-book">${quote.bookTitle}</h3>
     <h3 class="quote-author">${quote.authorName}</h3>
     <div class="actions">
-      <!-- Edit and Delete Buttons -->
       <button class="edit-btn" data-id="${quote.id}" title="Edit">
         <span class="material-icons">edit</span>
       </button>
@@ -436,25 +510,36 @@ function createQuoteCard(quote) {
     </div>
   `;
 
-  // Add event listener for viewing the quote
+  // Whole card click => view quote
   card.addEventListener("click", (e) => {
-    // Prevent triggering when clicking on edit/delete buttons
-    if (e.target.closest("button")) return;
+    if (e.target.closest("button")) return; // Ignore clicks on buttons
     openViewQuoteModal(quote.id);
   });
 
-  // Event listeners for edit and delete buttons
+  // Edit and delete buttons
   const editBtn = card.querySelector(".edit-btn");
   const deleteBtn = card.querySelector(".delete-btn");
-
   editBtn.addEventListener("click", (e) => {
-    e.stopPropagation(); // Prevent triggering card click
+    e.stopPropagation();
     editQuote(e);
   });
-
   deleteBtn.addEventListener("click", (e) => {
-    e.stopPropagation(); // Prevent triggering card click
+    e.stopPropagation();
     removeQuote(e);
+  });
+
+  // Clicking on book => book detail
+  const bookEl = card.querySelector(".quote-book");
+  bookEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openBookDetailPage(quote.bookTitle);
+  });
+
+  // Clicking on author => author detail
+  const authorEl = card.querySelector(".quote-author");
+  authorEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openAuthorDetailPage(quote.authorName);
   });
 
   return card;
@@ -475,32 +560,30 @@ function renderQuotes() {
 }
 
 function renderAuthorQuotes(quotesArray) {
-  const authorQuotesContainer = authorQuotesGrid;
-  authorQuotesContainer.innerHTML = "";
+  authorQuotesGrid.innerHTML = "";
 
   if (quotesArray.length === 0) {
-    authorQuotesContainer.innerHTML = "<p>No quotes available for this author.</p>";
+    authorQuotesGrid.innerHTML = "<p>No quotes available for this author.</p>";
     return;
   }
 
   quotesArray.forEach((quote) => {
     const card = createQuoteCard(quote);
-    authorQuotesContainer.appendChild(card);
+    authorQuotesGrid.appendChild(card);
   });
 }
 
 function renderBookQuotes(quotesArray) {
-  const bookQuotesContainer = bookQuotesGrid;
-  bookQuotesContainer.innerHTML = "";
+  bookQuotesGrid.innerHTML = "";
 
   if (quotesArray.length === 0) {
-    bookQuotesContainer.innerHTML = "<p>No quotes available for this book.</p>";
+    bookQuotesGrid.innerHTML = "<p>No quotes available for this book.</p>";
     return;
   }
 
   quotesArray.forEach((quote) => {
     const card = createQuoteCard(quote);
-    bookQuotesContainer.appendChild(card);
+    bookQuotesGrid.appendChild(card);
   });
 }
 
@@ -541,12 +624,9 @@ function renderAuthors() {
       <p>${authorObj.quoteCount} ${authorObj.quoteCount === 1 ? "quote" : "quotes"}</p>
       <p>${authorObj.books.size} ${authorObj.books.size === 1 ? "book" : "books"}</p>
     `;
-
-    // Add Event Listener to Open Author Detail Page
     card.addEventListener("click", () => {
       openAuthorDetailPage(authorObj.name);
     });
-
     authorsList.appendChild(card);
   });
 }
@@ -587,12 +667,9 @@ function renderBooks() {
       <p>By ${bookObj.author}</p>
       <p>${bookObj.quoteCount} ${bookObj.quoteCount === 1 ? "quote" : "quotes"}</p>
     `;
-
-    // Add Event Listener to Open Book Detail Page
     card.addEventListener("click", () => {
       openBookDetailPage(bookObj.title);
     });
-
     booksList.appendChild(card);
   });
 }
@@ -601,35 +678,28 @@ function renderBooks() {
  * Author Detail Page Handling
  ******************************************************************/
 function openAuthorDetailPage(authorName) {
-  // Hide all other pages
   mainMenu.classList.add("hidden");
   quotesPage.classList.add("hidden");
   authorsPage.classList.add("hidden");
   booksPage.classList.add("hidden");
   authorDetailPage.classList.remove("hidden");
   bookDetailPage.classList.add("hidden");
+  searchPageElement.classList.add("hidden");
+  hideOverlay();
 
-  // Render Author Details
   const authorQuotes = quotes.filter(q => q.authorName.toLowerCase() === authorName.toLowerCase());
+  authorNameDetail.textContent = authorName;
 
   if (!authorQuotes || authorQuotes.length === 0) {
-    authorNameDetail.textContent = authorName;
     authorBooksList.innerHTML = "<p>No books available for this author.</p>";
     authorQuotesGrid.innerHTML = "<p>No quotes available for this author.</p>";
     return;
   }
 
-  // Set Author Name
-  authorNameDetail.textContent = authorName;
-
-  // Get Unique Books by this Author
   const booksSet = new Set(authorQuotes.map(q => q.bookTitle));
   const authorBooks = Array.from(booksSet);
 
-  // Render Books
   renderAuthorBooks(authorBooks, authorName);
-
-  // Render Quotes
   renderAuthorQuotes(authorQuotes);
 }
 
@@ -644,20 +714,18 @@ function renderAuthorBooks(booksArray, authorName) {
   booksArray.forEach((bookTitle) => {
     const card = document.createElement("div");
     card.classList.add("book-card");
+    const quoteCount = quotes.filter(q =>
+      q.bookTitle.toLowerCase() === bookTitle.toLowerCase()
+    ).length;
     card.innerHTML = `
       <h3>${bookTitle}</h3>
       <p>By ${authorName}</p>
-      <p>${quotes.filter(q => q.bookTitle.toLowerCase() === bookTitle.toLowerCase()).length} ${quotes.filter(q => q.bookTitle.toLowerCase() === bookTitle.toLowerCase()).length === 1 ? "quote" : "quotes"}</p>
+      <p>${quoteCount} ${quoteCount === 1 ? "quote" : "quotes"}</p>
     `;
-
-    // Make the entire card clickable to view book details
     card.style.cursor = "pointer";
-
-    // Add Event Listener to Open Book Detail Page
     card.addEventListener("click", () => {
       openBookDetailPage(bookTitle);
     });
-
     authorBooksList.appendChild(card);
   });
 }
@@ -666,16 +734,16 @@ function renderAuthorBooks(booksArray, authorName) {
  * Book Detail Page Handling
  ******************************************************************/
 function openBookDetailPage(bookTitle) {
-  // Hide all other pages
   mainMenu.classList.add("hidden");
   quotesPage.classList.add("hidden");
   authorsPage.classList.add("hidden");
   booksPage.classList.add("hidden");
   authorDetailPage.classList.add("hidden");
   bookDetailPage.classList.remove("hidden");
+  searchPageElement.classList.add("hidden");
+  hideOverlay();
 
   const book = quotes.find(q => q.bookTitle.toLowerCase() === bookTitle.toLowerCase());
-
   if (!book) {
     bookTitleDetail.textContent = bookTitle;
     bookAuthorDetail.textContent = `By Unknown`;
@@ -683,19 +751,117 @@ function openBookDetailPage(bookTitle) {
     return;
   }
 
-  // Set Book Details
   bookTitleDetail.textContent = book.bookTitle;
   bookAuthorDetail.textContent = `By ${book.authorName}`;
 
-  // Filter Quotes for this Book
-  const bookQuotes = quotes.filter(q => q.bookTitle.toLowerCase() === bookTitle.toLowerCase());
-
-  // Render Quotes in the Page
+  const bookQuotes = quotes.filter(q =>
+    q.bookTitle.toLowerCase() === bookTitle.toLowerCase()
+  );
   renderBookQuotes(bookQuotes);
 }
 
 /*******************************************************************
- * Import & Export Functionality
+ * Search Functionality
+ ******************************************************************/
+function handleSearchInput(e) {
+  const query = e.target.value.trim().toLowerCase();
+  performSearch(query);
+}
+
+function performSearch(query) {
+  searchAuthors.innerHTML = "";
+  searchBooks.innerHTML = "";
+  searchQuotesGrid.innerHTML = "";
+
+  document.getElementById("searchAuthors").classList.add("hidden");
+  document.getElementById("searchBooks").classList.add("hidden");
+  document.getElementById("searchQuotes").classList.add("hidden");
+
+  if (query === "") {
+    return;
+  }
+
+  // Search Authors
+  const matchedAuthors = Array.from(new Set(quotes
+    .filter(q => q.authorName.toLowerCase().includes(query))
+    .map(q => q.authorName.trim())
+  ));
+  if (matchedAuthors.length > 0) {
+    document.getElementById("searchAuthors").classList.remove("hidden");
+    matchedAuthors.forEach(authorName => {
+      const card = document.createElement("div");
+      card.classList.add("author-card");
+      const count = quotes.filter(q =>
+        q.authorName.toLowerCase() === authorName.toLowerCase()
+      ).length;
+      card.innerHTML = `
+        <h3>${authorName}</h3>
+        <p>${count} ${count === 1 ? "quote" : "quotes"}</p>
+      `;
+      card.addEventListener("click", () => {
+        openAuthorDetailPage(authorName);
+      });
+      searchAuthors.appendChild(card);
+    });
+  }
+
+  // Search Books
+  const matchedBooks = Array.from(new Set(quotes
+    .filter(q => q.bookTitle.toLowerCase().includes(query))
+    .map(q => q.bookTitle.trim())
+  ));
+  if (matchedBooks.length > 0) {
+    document.getElementById("searchBooks").classList.remove("hidden");
+    matchedBooks.forEach(bookTitle => {
+      const bookObj = quotes.find(q =>
+        q.bookTitle.toLowerCase() === bookTitle.toLowerCase()
+      );
+      const authorName = bookObj ? bookObj.authorName : "Unknown";
+      const count = quotes.filter(q =>
+        q.bookTitle.toLowerCase() === bookTitle.toLowerCase()
+      ).length;
+      const card = document.createElement("div");
+      card.classList.add("book-card");
+      card.innerHTML = `
+        <h3>${bookTitle}</h3>
+        <p>By ${authorName}</p>
+        <p>${count} ${count === 1 ? "quote" : "quotes"}</p>
+      `;
+      card.addEventListener("click", () => {
+        openBookDetailPage(bookTitle);
+      });
+      searchBooks.appendChild(card);
+    });
+  }
+
+  // Search Quotes
+  const matchedQuotes = quotes.filter(q =>
+    q.quoteText.toLowerCase().includes(query) ||
+    q.bookTitle.toLowerCase().includes(query) ||
+    q.authorName.toLowerCase().includes(query)
+  );
+  if (matchedQuotes.length > 0) {
+    document.getElementById("searchQuotes").classList.remove("hidden");
+    matchedQuotes.forEach(quote => {
+      const card = createQuoteCard(quote);
+      searchQuotesGrid.appendChild(card);
+    });
+  }
+}
+
+function clearSearch() {
+  searchInput.value = "";
+  searchAuthors.innerHTML = "";
+  searchBooks.innerHTML = "";
+  searchQuotesGrid.innerHTML = "";
+
+  document.getElementById("searchAuthors").classList.add("hidden");
+  document.getElementById("searchBooks").classList.add("hidden");
+  document.getElementById("searchQuotes").classList.add("hidden");
+}
+
+/*******************************************************************
+ * Export & Import
  ******************************************************************/
 function exportQuotes() {
   if (!quotes || quotes.length === 0) {
@@ -703,28 +869,19 @@ function exportQuotes() {
     return;
   }
 
-  // Prepare CSV headers
   const headers = ["Quote", "Book Title", "Author Name"];
-  const rows = quotes.map(q => `"${q.quoteText.replace(/"/g, '""')}", "${q.bookTitle.replace(/"/g, '""')}", "${q.authorName.replace(/"/g, '""')}"`);
-
-  // Combine headers and rows
+  const rows = quotes.map(q =>
+    `"${q.quoteText.replace(/"/g, '""')}", "${q.bookTitle.replace(/"/g, '""')}", "${q.authorName.replace(/"/g, '""')}"`
+  );
   const csvContent = [headers.join(","), ...rows].join("\n");
-
-  // Create a Blob from the CSV content
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-
-  // Create a link to download the Blob
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   link.setAttribute("href", url);
   link.setAttribute("download", "quotes_export.csv");
   link.style.visibility = "hidden";
   document.body.appendChild(link);
-
-  // Trigger the download
   link.click();
-
-  // Cleanup
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 }
@@ -737,14 +894,13 @@ function importQuotes(event) {
   reader.onload = async function(e) {
     const content = e.target.result;
     const lines = content.split("\n").filter(line => line.trim() !== "");
-    
+
     if (lines.length < 2) {
       alert("CSV file does not contain data.");
       return;
     }
 
-    // Assuming first line is headers
-    const headers = lines[0].split(",").map(header => header.trim().toLowerCase());
+    const headers = lines[0].split(",").map(h => h.trim().toLowerCase());
     const quoteIndex = headers.indexOf("quote");
     const bookTitleIndex = headers.indexOf("book title");
     const authorNameIndex = headers.indexOf("author name");
@@ -757,15 +913,18 @@ function importQuotes(event) {
     const newQuotes = [];
     for (let i = 1; i < lines.length; i++) {
       const values = parseCSVLine(lines[i]);
-      if (values.length < 3) continue; // Skip incomplete lines
+      if (values.length < 3) continue;
 
       const quoteText = values[quoteIndex].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
       const bookTitle = values[bookTitleIndex].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
       const authorName = values[authorNameIndex].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
 
       if (quoteText && bookTitle && authorName) {
-        // Check for duplicates
-        const duplicate = quotes.find(q => q.quoteText === quoteText && q.bookTitle === bookTitle && q.authorName === authorName);
+        const duplicate = quotes.find(q =>
+          q.quoteText === quoteText &&
+          q.bookTitle === bookTitle &&
+          q.authorName === authorName
+        );
         if (!duplicate) {
           const newQuote = {
             id: crypto.randomUUID(),
@@ -783,7 +942,6 @@ function importQuotes(event) {
       return;
     }
 
-    // Add new quotes to IndexedDB
     for (const quote of newQuotes) {
       try {
         await addQuoteToDB(quote);
@@ -796,6 +954,7 @@ function importQuotes(event) {
     renderQuotes();
     renderAuthors();
     renderBooks();
+    performSearch(searchInput.value.trim());
     alert(`${newQuotes.length} quote(s) imported successfully.`);
   };
 
@@ -806,7 +965,6 @@ function importQuotes(event) {
   reader.readAsText(file);
 }
 
-// Utility function to parse a CSV line considering quotes
 function parseCSVLine(line) {
   const result = [];
   let current = '';
@@ -814,10 +972,10 @@ function parseCSVLine(line) {
 
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
-    if (char === '"' ) {
+    if (char === '"') {
       if (inQuotes && line[i+1] === '"') {
         current += '"';
-        i++; // Skip the escaped quote
+        i++;
       } else {
         inQuotes = !inQuotes;
       }
@@ -847,20 +1005,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /*******************************************************************
- * Book Detail Page Handling
- ******************************************************************/
-// Already handled within openBookDetailPage and renderBookQuotes
-
-/*******************************************************************
- * Author Detail Page Handling
- ******************************************************************/
-// Already handled within openAuthorDetailPage, renderAuthorBooks, and renderAuthorQuotes
-
-/*******************************************************************
  * Quote Card Event Handling
  ******************************************************************/
 function editQuote(e) {
-  // Get the quote's ID
   const quoteId = e.target.closest("button").getAttribute("data-id");
   const quoteToEdit = quotes.find((q) => q.id === quoteId);
 
@@ -868,47 +1015,15 @@ function editQuote(e) {
     alert("Quote not found.");
     return;
   }
-
-  // Set editing mode
   editingQuoteId = quoteId;
-
-  // Populate the form
   quoteTextInput.value = quoteToEdit.quoteText;
   bookTitleInput.value = quoteToEdit.bookTitle;
   authorNameInput.value = quoteToEdit.authorName;
-
-  // Open the modal
   openAddQuoteModal();
 }
 
 function removeQuote(e) {
-  // Get the quote's ID
   const quoteId = e.target.closest("button").getAttribute("data-id");
-
-  // Store quote ID and open confirm deletion modal
   quoteToDeleteId = quoteId;
-  confirmDeleteModal.classList.remove("hidden");
-  document.body.classList.add("modal-open");
+  openConfirmDeleteModal();
 }
-
-/*******************************************************************
- * Quotes Click Handler Fix
- ******************************************************************/
-function openViewQuoteModal(id) {
-  const quote = quotes.find(q => q.id === id);
-  if (!quote) {
-    alert("Quote not found.");
-    return;
-  }
-
-  currentViewQuoteId = id;
-
-  // Update modal content
-  viewQuoteText.textContent = quote.quoteText;
-  viewQuoteBook.textContent = quote.bookTitle; // Set book title
-  viewQuoteAuthor.textContent = quote.authorName; // Set author name
-
-  viewQuoteModal.classList.remove("hidden");
-  document.body.classList.add("modal-open");
-}
-

@@ -75,6 +75,8 @@ function getAllQuotesFromDB() {
  ******************************************************************/
 let quotes = [];
 let editingQuoteId = null;
+let quoteToDeleteId = null; // Used for confirm deletion
+let currentViewQuoteId = null; // Used for viewing a quote
 
 /*******************************************************************
  * DOM Elements
@@ -107,6 +109,21 @@ const quotesGrid = document.querySelector(".grid");
 const authorsList = document.getElementById("authorsList");
 const booksList = document.getElementById("booksList");
 
+const confirmDeleteModal = document.getElementById("confirmDeleteModal");
+const deleteConfirmBtn = document.getElementById("deleteConfirmBtn");
+const deleteCancelBtn = document.getElementById("deleteCancelBtn");
+
+const viewQuoteModal = document.getElementById("viewQuoteModal");
+const closeViewModalBtn = document.getElementById("closeViewModalBtn");
+const viewQuoteText = document.getElementById("viewQuoteText");
+const viewQuoteDetails = document.getElementById("viewQuoteDetails");
+const viewEditBtn = document.getElementById("viewEditBtn");
+const viewDeleteBtn = document.getElementById("viewDeleteBtn");
+
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const importFileInput = document.getElementById("importFileInput");
+
 /*******************************************************************
  * Event Listeners
  ******************************************************************/
@@ -121,14 +138,67 @@ quotesNavBtn.addEventListener("click", showQuotesPage);
 authorsNavBtn.addEventListener("click", showAuthorsPage);
 booksNavBtn.addEventListener("click", showBooksPage);
 
-// Modal & Form
-addQuoteToggle.addEventListener("click", openAddQuoteModal);
+// Add/Edit Quote Modal
+addQuoteToggle.addEventListener("click", () => {
+  // Only reset editingQuoteId if we're truly adding new
+  editingQuoteId = null;
+  openAddQuoteModal();
+});
 closeFormBtn.addEventListener("click", closeAddQuoteModal);
 discardBtn.addEventListener("click", () => {
   resetForm();
   closeAddQuoteModal();
 });
 quoteForm.addEventListener("submit", handleFormSubmit);
+
+// Confirm Deletion Modal
+deleteConfirmBtn.addEventListener("click", confirmDeletion);
+deleteCancelBtn.addEventListener("click", cancelDeletion);
+
+// View Quote Modal
+closeViewModalBtn.addEventListener("click", () => {
+  viewQuoteModal.classList.add("hidden");
+  currentViewQuoteId = null;
+});
+viewEditBtn.addEventListener("click", () => {
+  // Open Add/Edit modal with current quote data
+  const quote = quotes.find(q => q.id === currentViewQuoteId);
+  if (quote) {
+    editingQuoteId = quote.id;
+    quoteTextInput.value = quote.quoteText;
+    bookTitleInput.value = quote.bookTitle;
+    authorNameInput.value = quote.authorName;
+    closeViewQuoteModal();
+    openAddQuoteModal();
+  }
+});
+viewDeleteBtn.addEventListener("click", () => {
+  // Trigger deletion via confirm deletion modal
+  quoteToDeleteId = currentViewQuoteId;
+  confirmDeleteModal.classList.remove("hidden");
+  // Close view modal
+  viewQuoteModal.classList.add("hidden");
+  currentViewQuoteId = null;
+});
+
+// Export and Import
+exportBtn.addEventListener("click", exportQuotes);
+importBtn.addEventListener("click", () => importFileInput.click());
+importFileInput.addEventListener("change", importQuotes);
+
+// Click outside modals to dismiss
+window.addEventListener("click", (event) => {
+  if (event.target === addQuoteMenu) {
+    closeAddQuoteModal();
+  }
+  if (event.target === confirmDeleteModal) {
+    cancelDeletion();
+  }
+  if (event.target === viewQuoteModal) {
+    viewQuoteModal.classList.add("hidden");
+    currentViewQuoteId = null;
+  }
+});
 
 /*******************************************************************
  * Page Navigation
@@ -179,19 +249,54 @@ function showBooksPage() {
   topNav.classList.remove("hidden");
 
   addQuoteToggle.classList.add("hidden");
-  renderBooks();
 }
 
 /*******************************************************************
  * Modal Handling
  ******************************************************************/
 function openAddQuoteModal() {
-  editingQuoteId = null;
+  // Show the Add/Edit quote modal
   addQuoteMenu.classList.remove("hidden");
 }
 
 function closeAddQuoteModal() {
   addQuoteMenu.classList.add("hidden");
+}
+
+function closeViewQuoteModal() {
+  viewQuoteModal.classList.add("hidden");
+  currentViewQuoteId = null;
+}
+
+/*******************************************************************
+ * Confirm Deletion
+ ******************************************************************/
+function confirmDeletion() {
+  // Close confirm deletion modal
+  confirmDeleteModal.classList.add("hidden");
+
+  if (quoteToDeleteId) {
+    // Remove quote from memory
+    quotes = quotes.filter((q) => q.id !== quoteToDeleteId);
+
+    // Remove from IndexedDB
+    deleteQuoteFromDB(quoteToDeleteId).then(() => {
+      renderQuotes();
+      // If a view modal was open for this quote, close it
+      if (currentViewQuoteId === quoteToDeleteId) {
+        closeViewQuoteModal();
+      }
+    });
+
+    // Reset ID
+    quoteToDeleteId = null;
+  }
+}
+
+function cancelDeletion() {
+  // Reset and close modal without action
+  quoteToDeleteId = null;
+  confirmDeleteModal.classList.add("hidden");
 }
 
 /*******************************************************************
@@ -212,18 +317,24 @@ async function saveQuote() {
     return;
   }
 
+  // If editingQuoteId is set, update existing
   if (editingQuoteId) {
-    // Update existing quote
     const index = quotes.findIndex((q) => q.id === editingQuoteId);
     if (index !== -1) {
       quotes[index].quoteText = quoteText;
       quotes[index].bookTitle = bookTitle;
       quotes[index].authorName = authorName;
       await updateQuoteInDB(quotes[index]);
+
+      // If viewing this quote, update view modal
+      if (currentViewQuoteId === editingQuoteId) {
+        viewQuoteText.textContent = quotes[index].quoteText;
+        viewQuoteDetails.textContent = `${quotes[index].bookTitle} - ${quotes[index].authorName}`;
+      }
     }
     editingQuoteId = null;
   } else {
-    // Add new quote
+    // Otherwise, create a new quote
     const newQuote = {
       id: crypto.randomUUID(),
       quoteText,
@@ -262,22 +373,35 @@ function renderQuotes() {
   quotes.forEach((quote) => {
     const card = document.createElement("div");
     card.classList.add("quote-card");
+    card.setAttribute("data-id", quote.id);
 
-    // Optionally shorten the displayed text
-    const shortText = 
-      quote.quoteText.length > 50
-        ? quote.quoteText.slice(0, 50).split(" ").slice(0, -1).join(" ") + "..."
+    const shortText =
+      quote.quoteText.length > 100
+        ? quote.quoteText.slice(0, 100).split(" ").slice(0, -1).join(" ") + "..."
         : quote.quoteText;
 
     card.innerHTML = `
       <p>"${shortText}"</p>
-      <h3>${quote.bookTitle} - ${quote.authorName}</h3>
+      <h3>${quote.bookTitle}</h3>
+      <h3> - ${quote.authorName}</h3>
       <div class="actions">
-        <!-- Pen (Edit) and Trash (Delete) icons -->
-        <button class="edit-btn" data-id="${quote.id}" title="Edit">✎</button>
-        <button class="delete-btn" data-id="${quote.id}" title="Delete">🗑</button>
+        <!-- Edit and Delete Buttons -->
+        <button class="edit-btn" data-id="${quote.id}" title="Edit">
+          <span class="material-icons">edit</span>
+        </button>
+        <button class="delete-btn" data-id="${quote.id}" title="Delete">
+          <span class="material-icons">delete</span>
+        </button>
       </div>
     `;
+
+    // Add event listener for viewing the quote
+    card.addEventListener("click", (e) => {
+      // Prevent triggering when clicking on edit/delete buttons
+      if (e.target.closest("button")) return;
+      openViewQuoteModal(quote.id);
+    });
+
     quotesGrid.appendChild(card);
   });
 
@@ -289,15 +413,22 @@ function attachQuoteEventListeners() {
   const deleteButtons = document.querySelectorAll(".delete-btn");
 
   editButtons.forEach((btn) => {
-    btn.addEventListener("click", editQuote);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation(); // Prevent triggering card click
+      editQuote(e);
+    });
   });
   deleteButtons.forEach((btn) => {
-    btn.addEventListener("click", removeQuote);
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation(); // Prevent triggering card click
+      removeQuote(e);
+    });
   });
 }
 
 function editQuote(e) {
-  const quoteId = e.target.getAttribute("data-id");
+  // Get the quote's ID
+  const quoteId = e.target.closest("button").getAttribute("data-id");
   const quoteToEdit = quotes.find((q) => q.id === quoteId);
 
   if (!quoteToEdit) {
@@ -305,21 +436,39 @@ function editQuote(e) {
     return;
   }
 
+  // Set editing mode
   editingQuoteId = quoteId;
+
+  // Populate the form
   quoteTextInput.value = quoteToEdit.quoteText;
   bookTitleInput.value = quoteToEdit.bookTitle;
   authorNameInput.value = quoteToEdit.authorName;
 
+  // Open the modal
   openAddQuoteModal();
 }
 
-async function removeQuote(e) {
-  const quoteId = e.target.getAttribute("data-id");
-  if (!confirm("Do you want to delete this quote?")) return;
+function removeQuote(e) {
+  // Get the quote's ID
+  const quoteId = e.target.closest("button").getAttribute("data-id");
 
-  quotes = quotes.filter((q) => q.id !== quoteId);
-  await deleteQuoteFromDB(quoteId);
-  renderQuotes();
+  // Store quote ID and open confirm deletion modal
+  quoteToDeleteId = quoteId;
+  confirmDeleteModal.classList.remove("hidden");
+}
+
+function openViewQuoteModal(id) {
+  const quote = quotes.find(q => q.id === id);
+  if (!quote) {
+    alert("Quote not found.");
+    return;
+  }
+
+  currentViewQuoteId = id;
+  viewQuoteText.textContent = `"${quote.quoteText}"`;
+  viewQuoteDetails.textContent = `${quote.bookTitle} - ${quote.authorName}`;
+
+  viewQuoteModal.classList.remove("hidden");
 }
 
 /*******************************************************************
@@ -356,12 +505,8 @@ function renderAuthors() {
     card.classList.add("author-card");
     card.innerHTML = `
       <h3>${authorObj.name}</h3>
-      <p>${authorObj.quoteCount} ${
-        authorObj.quoteCount === 1 ? "quote" : "quotes"
-      }</p>
-      <p>${authorObj.books.size} ${
-        authorObj.books.size === 1 ? "book" : "books"
-      }</p>
+      <p>${authorObj.quoteCount} ${authorObj.quoteCount === 1 ? "quote" : "quotes"}</p>
+      <p>${authorObj.books.size} ${authorObj.books.size === 1 ? "book" : "books"}</p>
     `;
     authorsList.appendChild(card);
   });
@@ -401,19 +546,158 @@ function renderBooks() {
     card.innerHTML = `
       <h3>${bookObj.title}</h3>
       <p>By ${bookObj.author}</p>
-      <p>${bookObj.quoteCount} ${
-        bookObj.quoteCount === 1 ? "quote" : "quotes"
-      }</p>
+      <p>${bookObj.quoteCount} ${bookObj.quoteCount === 1 ? "quote" : "quotes"}</p>
     `;
     booksList.appendChild(card);
   });
 }
 
 /*******************************************************************
+ * Import & Export Functionality
+ ******************************************************************/
+function exportQuotes() {
+  if (!quotes || quotes.length === 0) {
+    alert("No quotes to export.");
+    return;
+  }
+
+  // Prepare CSV headers
+  const headers = ["Quote", "Book Title", "Author Name"];
+  const rows = quotes.map(q => `"${q.quoteText.replace(/"/g, '""')}", "${q.bookTitle.replace(/"/g, '""')}", "${q.authorName.replace(/"/g, '""')}"`);
+
+  // Combine headers and rows
+  const csvContent = [headers.join(","), ...rows].join("\n");
+
+  // Create a Blob from the CSV content
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+
+  // Create a link to download the Blob
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", "quotes_export.csv");
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+
+  // Trigger the download
+  link.click();
+
+  // Cleanup
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
+function importQuotes(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async function(e) {
+    const content = e.target.result;
+    const lines = content.split("\n").filter(line => line.trim() !== "");
+    
+    if (lines.length < 2) {
+      alert("CSV file does not contain data.");
+      return;
+    }
+
+    // Assuming first line is headers
+    const headers = lines[0].split(",").map(header => header.trim().toLowerCase());
+    const quoteIndex = headers.indexOf("quote");
+    const bookTitleIndex = headers.indexOf("book title");
+    const authorNameIndex = headers.indexOf("author name");
+
+    if (quoteIndex === -1 || bookTitleIndex === -1 || authorNameIndex === -1) {
+      alert("Invalid CSV format. Please ensure the headers are: Quote, Book Title, Author Name.");
+      return;
+    }
+
+    const newQuotes = [];
+    for (let i = 1; i < lines.length; i++) {
+      const values = parseCSVLine(lines[i]);
+      if (values.length < 3) continue; // Skip incomplete lines
+
+      const quoteText = values[quoteIndex].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+      const bookTitle = values[bookTitleIndex].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+      const authorName = values[authorNameIndex].replace(/^"|"$/g, '').replace(/""/g, '"').trim();
+
+      if (quoteText && bookTitle && authorName) {
+        // Check for duplicates
+        const duplicate = quotes.find(q => q.quoteText === quoteText && q.bookTitle === bookTitle && q.authorName === authorName);
+        if (!duplicate) {
+          const newQuote = {
+            id: crypto.randomUUID(),
+            quoteText,
+            bookTitle,
+            authorName
+          };
+          newQuotes.push(newQuote);
+        }
+      }
+    }
+
+    if (newQuotes.length === 0) {
+      alert("No new quotes to import or all quotes are duplicates.");
+      return;
+    }
+
+    // Add new quotes to IndexedDB
+    for (const quote of newQuotes) {
+      try {
+        await addQuoteToDB(quote);
+        quotes.push(quote);
+      } catch (error) {
+        console.error(`Failed to add quote: ${error}`);
+      }
+    }
+
+    renderQuotes();
+    alert(`${newQuotes.length} quote(s) imported successfully.`);
+  };
+
+  reader.onerror = () => {
+    alert("Failed to read the file.");
+  };
+
+  reader.readAsText(file);
+}
+
+// Utility function to parse a CSV line considering quotes
+function parseCSVLine(line) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+    if (char === '"' ) {
+      if (inQuotes && line[i+1] === '"') {
+        current += '"';
+        i++; // Skip the escaped quote
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (char === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+/*******************************************************************
  * On Page Load
  ******************************************************************/
 document.addEventListener("DOMContentLoaded", async () => {
-  await openDB();
-  await loadQuotesFromDB();
-  showMainMenu();
+  try {
+    await openDB();
+    await loadQuotesFromDB();
+    showMainMenu();
+  } catch (error) {
+    console.error(error);
+    alert("Failed to initialize the application.");
+  }
 });

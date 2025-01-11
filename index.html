@@ -4,16 +4,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>My Quotes Website</title>
+  
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  
+  <!-- Link to your CSS -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Header Bar (Hidden on Main Menu) -->
-  <header id="topNav" class="hidden">
+  <!-- Header Bar (Visible on All Pages Except Main Menu) -->
+  <header id="topNav">
     <nav class="navbar">
-      <button id="homeBtn" class="nav-button" title="Home">🏠</button>
-      <button id="quotesNavBtn" class="nav-button">Quotes</button>
-      <button id="authorsNavBtn" class="nav-button">Authors</button>
-      <button id="booksNavBtn" class="nav-button">Books</button>
+      <div class="nav-left">
+        <button id="homeBtn" class="nav-button" title="Home">
+          <span class="material-icons">home</span>
+        </button>
+        <button id="quotesNavBtn" class="nav-button" title="Quotes">
+          <span class="material-icons">format_quote</span> Quotes
+        </button>
+        <button id="authorsNavBtn" class="nav-button" title="Authors">
+          <span class="material-icons">person</span> Authors
+        </button>
+        <button id="booksNavBtn" class="nav-button" title="Books">
+          <span class="material-icons">book</span> Books
+        </button>
+      </div>
+      <div class="nav-right">
+        <button id="exportBtn" class="nav-button" title="Export Quotes">
+          <span class="material-icons">file_download</span>
+        </button>
+        <button id="importBtn" class="nav-button" title="Import Quotes">
+          <span class="material-icons">file_upload</span>
+        </button>
+        <!-- Hidden File Input for Import -->
+        <input type="file" id="importFileInput" accept=".csv" class="hidden" />
+      </div>
     </nav>
   </header>
 
@@ -23,9 +48,15 @@
       <h1>Welcome to My Quotes</h1>
       <p>A curated place for your favorite quotes.</p>
       <div class="menu">
-        <button class="menu-button" id="quotesMenu">Quotes</button>
-        <button class="menu-button" id="authorsMenu">Authors</button>
-        <button class="menu-button" id="booksMenu">Books</button>
+        <button class="menu-button" id="quotesMenu">
+          <span class="material-icons">format_quote</span> Quotes
+        </button>
+        <button class="menu-button" id="authorsMenu">
+          <span class="material-icons">person</span> Authors
+        </button>
+        <button class="menu-button" id="booksMenu">
+          <span class="material-icons">book</span> Books
+        </button>
       </div>
     </div>
 
@@ -33,14 +64,11 @@
     <div id="quotesPage" class="hidden">
       <div class="quotes-header">
         <h2>Quotes</h2>
-        <button
-          id="addQuoteToggle"
-          class="hidden"
-          title="Add Quote"
-        >+</button>
+        <button id="addQuoteToggle" title="Add Quote">
+          <span class="material-icons">add</span>
+        </button>
       </div>
       <div id="quotesGrid" class="quotes-grid">
-        <!-- No "All Quotes" text here -->
         <div class="grid"></div>
       </div>
     </div>
@@ -60,12 +88,13 @@
     <!-- Modal for Add/Edit Quote -->
     <div id="addQuoteMenu" class="modal hidden">
       <!-- Close Modal (X) -->
-      <button id="closeFormBtn" class="close-modal">X</button>
+      <button id="closeFormBtn" class="close-modal">
+        <span class="material-icons">close</span>
+      </button>
 
-      <h3 id="formTitle">Add or Edit a Quote</h3>
       <form id="quoteForm">
         <label for="quoteText">Quote:</label>
-        <textarea id="quoteText" rows="3" required></textarea>
+        <textarea id="quoteText" rows="5" required></textarea>
 
         <label for="bookTitle">Book Title:</label>
         <input type="text" id="bookTitle" required />
@@ -73,15 +102,51 @@
         <label for="authorName">Author:</label>
         <input type="text" id="authorName" required />
 
-        <!-- Form Footer for Save/Discard -->
+        <!-- Form Footer for Save/Discard Buttons -->
         <div class="form-footer">
           <button type="submit" id="saveBtn">Save</button>
           <button type="button" id="discardBtn">Discard</button>
         </div>
       </form>
     </div>
+
+    <!-- Confirm Deletion Modal -->
+    <div id="confirmDeleteModal" class="modal hidden">
+      <h3>Confirm Deletion</h3>
+      <p>Are you sure you want to delete this quote?</p>
+      <div class="form-footer">
+        <button id="deleteConfirmBtn">
+          <span class="material-icons">delete</span> Delete
+        </button>
+        <button id="deleteCancelBtn">
+          <span class="material-icons">close</span> Cancel
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal for Viewing a Quote -->
+    <div id="viewQuoteModal" class="modal hidden">
+      <!-- Close Modal (X) -->
+      <button id="closeViewModalBtn" class="close-modal">
+        <span class="material-icons">close</span>
+      </button>
+
+      <div class="view-content">
+        <p id="viewQuoteText"></p>
+        <h3 id="viewQuoteDetails"></h3>
+      </div>
+      <div class="form-footer">
+        <button id="viewEditBtn">
+          <span class="material-icons">edit</span> Edit
+        </button>
+        <button id="viewDeleteBtn">
+          <span class="material-icons">delete</span> Delete
+        </button>
+      </div>
+    </div>
   </main>
 
+  <!-- Link to your JS -->
   <script src="script.js"></script>
 </body>
 </html>

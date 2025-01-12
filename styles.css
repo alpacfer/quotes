@@ -56,39 +56,45 @@ html {
   top: 0;
   left: 0;
   bottom: 0;
-  z-index: 1000;
+  z-index: 1000; /* below modal overlay so overlay covers it */
   transition: transform 0.3s ease;
 }
 
 #sidePanel.collapsed {
-  transform: translateX(-250px);
+  transform: translateX(-100%); /* fully hidden off-screen */
 }
 
-#sidebarToggle {
-  position: fixed;
-  top: 20px;
-  left: 250px;
-  z-index: 1001;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  cursor: pointer;
+/* Close Panel Button */
+.close-panel-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: left 0.3s ease;
+  font-size: 22px;
+}
+
+/****************************************************************
+ * Open Sidebar Button
+ ****************************************************************/
+#openSidebarBtn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
   box-shadow: var(--box-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#sidebarToggle:hover {
+#openSidebarBtn:hover {
   background-color: var(--button-hover);
-}
-
-#sidebarToggle.collapsed {
-  left: 60px;
 }
 
 /* Side Buttons */
@@ -155,8 +161,9 @@ main {
   transition: margin-left 0.3s ease;
 }
 
-#sidePanel.collapsed + #sidebarToggle + main {
-  margin-left: 60px;
+/* If side panel is collapsed, we shift main content back */
+#sidePanel.collapsed ~ main {
+  margin-left: 0;
 }
 
 /****************************************************************
@@ -336,6 +343,12 @@ main {
   text-decoration: none;
 }
 
+/* Underline on hover to indicate link */
+.quote-card .quote-book:hover,
+.quote-card .quote-author:hover {
+  text-decoration: underline;
+}
+
 .quote-card .quote-book {
   margin-bottom: 5px;
   font-size: 1.1rem;
@@ -405,15 +418,6 @@ main {
 .edit-btn {
   background-color: var(--accent-color);
   color: #ffffff;
-  width: 35px;
-  height: 35px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s ease;
 }
 
 .edit-btn:hover {
@@ -423,15 +427,6 @@ main {
 .delete-btn {
   background-color: var(--danger-color);
   color: #ffffff;
-  width: 35px;
-  height: 35px;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background-color 0.3s ease;
 }
 
 .delete-btn:hover {
@@ -472,7 +467,7 @@ main {
   width: 100%;
   height: 100%;
   background: var(--modal-overlay-bg);
-  z-index: 999;
+  z-index: 2000; /* Above side panel */
 }
 
 /****************************************************************
@@ -490,7 +485,7 @@ main {
   max-width: 600px;
   padding: 25px;
   text-align: left;
-  z-index: 1000;
+  z-index: 3000; /* Above overlay */
 }
 
 /****************************************************************
@@ -699,18 +694,8 @@ main {
     width: 200px;
   }
 
-  #sidebarToggle {
-    left: 200px;
-  }
-
-  #sidePanel.collapsed + #sidebarToggle + main {
-    margin-left: 60px;
-  }
-
   main {
-    margin-left: 60px;
-    padding: 10px;
-    width: calc(100% - 60px);
+    margin-left: 0; /* Let the sidePanel overlap if not collapsed */
   }
 
   .quotes-header {
@@ -737,5 +722,9 @@ main {
   .cards-container.grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+  }
+
+  #openSidebarBtn {
+    left: 10px;
   }
 }

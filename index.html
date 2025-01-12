@@ -12,8 +12,18 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
+  <!-- Button to open side panel when hidden -->
+  <button id="openSidebarBtn" class="hidden">
+    <span class="material-icons">menu</span>
+  </button>
+
   <!-- Side Panel -->
   <div id="sidePanel">
+    <!-- Close side panel button -->
+    <button id="closeSidebarBtn" class="side-button close-panel-btn" title="Hide Panel">
+      <span class="material-icons">chevron_left</span>
+    </button>
+
     <button id="homeSideBtn" class="side-button">
       <span class="material-icons">home</span> Home
     </button>
@@ -44,14 +54,10 @@
       <button id="importBtn" class="side-button">
         <span class="material-icons">file_upload</span> Import
       </button>
+      <!-- Hidden File Input for Import -->
       <input type="file" id="importFileInput" accept=".csv" class="hidden" />
     </div>
   </div>
-
-  <!-- Sidebar Toggle Button -->
-  <button id="sidebarToggle" title="Toggle Sidebar">
-    <span class="material-icons">menu</span>
-  </button>
 
   <main>
     <!-- Quotes Page (Default) -->
@@ -155,11 +161,15 @@
         <label for="quoteText">Quote:</label>
         <textarea id="quoteText" rows="5" required></textarea>
 
+        <!-- Book Title with datalist -->
         <label for="bookTitle">Book Title:</label>
-        <input type="text" id="bookTitle" required />
+        <input list="booksDataList" type="text" id="bookTitle" required />
+        <datalist id="booksDataList"></datalist>
 
+        <!-- Author with datalist -->
         <label for="authorName">Author:</label>
-        <input type="text" id="authorName" required />
+        <input list="authorsDataList" type="text" id="authorName" required />
+        <datalist id="authorsDataList"></datalist>
 
         <div class="form-footer">
           <button type="submit" id="saveBtn">Save</button>

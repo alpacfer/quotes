@@ -88,6 +88,10 @@ let currentViewQuoteId = null;
  * DOM Elements
  ********************************************************/
 // Side Panel
+const sidePanel = document.getElementById("sidePanel");
+const openSidebarBtn = document.getElementById("openSidebarBtn");
+const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+
 const homeSideBtn = document.getElementById("homeSideBtn");
 const top5BooksList = document.getElementById("top5BooksList");
 const showAllBooksBtn = document.getElementById("showAllBooks");
@@ -96,7 +100,6 @@ const showAllAuthorsBtn = document.getElementById("showAllAuthors");
 const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
 const importFileInput = document.getElementById("importFileInput");
-const sidebarToggle = document.getElementById("sidebarToggle");
 
 // Main: Quotes Page
 const quotesPage = document.getElementById("quotesPage");
@@ -105,7 +108,7 @@ const clearSearchBtn = document.getElementById("clearSearchBtn");
 const addQuoteToggle = document.getElementById("addQuoteToggle");
 const defaultQuotesGrid = document.getElementById("defaultQuotesGrid");
 
-// Search Results Grid
+// Search Results
 const searchResultsGrid = document.getElementById("searchResultsGrid");
 const searchQuotesSection = document.getElementById("searchQuotesSection");
 const searchBooksSection = document.getElementById("searchBooksSection");
@@ -156,19 +159,29 @@ const viewQuoteAuthor = document.getElementById("viewQuoteAuthor");
 const viewEditBtn = document.getElementById("viewEditBtn");
 const viewDeleteBtn = document.getElementById("viewDeleteBtn");
 
+// DataLists for autocomplete
+const booksDataList = document.getElementById("booksDataList");
+const authorsDataList = document.getElementById("authorsDataList");
+
 /********************************************************
  * Event Listeners
  ********************************************************/
 // Side Panel Navigation
+closeSidebarBtn.addEventListener("click", () => {
+  sidePanel.classList.add("collapsed");
+  openSidebarBtn.classList.remove("hidden");
+});
+openSidebarBtn.addEventListener("click", () => {
+  sidePanel.classList.remove("collapsed");
+  openSidebarBtn.classList.add("hidden");
+});
+
 homeSideBtn.addEventListener("click", () => {
   showQuotesPage();
   clearSearchField();
 });
 showAllBooksBtn.addEventListener("click", showBooksPage);
 showAllAuthorsBtn.addEventListener("click", showAuthorsPage);
-
-// Sidebar Toggle
-sidebarToggle.addEventListener("click", toggleSidebar);
 
 // Quotes Page
 quotesSearchInput.addEventListener("input", debounce(handleSearchInput, 300));
@@ -178,7 +191,7 @@ addQuoteToggle.addEventListener("click", () => {
 });
 clearSearchBtn.addEventListener("click", clearSearchField);
 
-// Authors & Books Nav Buttons
+// Authors & Books Nav
 backFromAuthors.addEventListener("click", showQuotesPage);
 backFromBooks.addEventListener("click", showQuotesPage);
 
@@ -222,18 +235,20 @@ exportBtn.addEventListener("click", exportQuotes);
 importBtn.addEventListener("click", () => importFileInput.click());
 importFileInput.addEventListener("change", importQuotes);
 
-// Clicking outside modals => close them (except Add/Edit)
+// Clicking outside => close only for certain modals
 window.addEventListener("click", (event) => {
+  // Overlay clicked?
   if (event.target === modalOverlay) {
+    // For viewQuoteModal
     if (!viewQuoteModal.classList.contains("hidden")) {
       closeViewQuoteModal();
     }
+    // For confirmDeleteModal
     if (!confirmDeleteModal.classList.contains("hidden")) {
       cancelDeletion();
     }
-    if (!addQuoteMenu.classList.contains("hidden")) {
-      closeAddQuoteModal();
-    }
+    // DO NOT close addQuoteMenu when clicked outside
+    // (per your requirement, add/edit modal does NOT dismiss)
   }
 });
 
@@ -436,10 +451,12 @@ async function saveQuote() {
 
   resetForm();
   closeAddQuoteModal();
+  // After changes, re-render
   handleSearchInput();
   renderAuthors();
   renderBooks();
   updateSidePanel();
+  updateDataLists(); // Refresh datalist
 }
 
 function resetForm() {
@@ -456,10 +473,28 @@ async function loadQuotesFromDB() {
     updateSidePanel();
     renderAuthors();
     renderBooks();
+    updateDataLists();
   } catch (error) {
     console.error(error);
     alert("Failed to load quotes from the database.");
   }
+}
+
+/********************************************************
+ * Autocomplete DataLists
+ ********************************************************/
+function updateDataLists() {
+  // Unique Books
+  const uniqueBooks = [...new Set(quotes.map(q => q.bookTitle.trim()))];
+  booksDataList.innerHTML = uniqueBooks
+    .map(book => `<option value="${book}">`)
+    .join("");
+
+  // Unique Authors
+  const uniqueAuthors = [...new Set(quotes.map(q => q.authorName.trim()))];
+  authorsDataList.innerHTML = uniqueAuthors
+    .map(author => `<option value="${author}">`)
+    .join("");
 }
 
 /********************************************************
@@ -468,7 +503,6 @@ async function loadQuotesFromDB() {
 function handleSearchInput() {
   const query = quotesSearchInput.value.trim().toLowerCase();
 
-  // Clear old results
   searchQuotesGrid.innerHTML = "";
   searchBooksGrid.innerHTML = "";
   searchAuthorsGrid.innerHTML = "";
@@ -834,6 +868,7 @@ function importQuotes(event) {
     renderAuthors();
     renderBooks();
     updateSidePanel();
+    updateDataLists();
     alert(`${newQuotes.length} quote(s) imported successfully.`);
   };
 
@@ -855,7 +890,6 @@ function parseCSVLine(line) {
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
     if (char === '"') {
-      // If we see a doubled quote
       if (inQuotes && line[i + 1] === '"') {
         current += '"';
         i++;
@@ -939,23 +973,6 @@ function updateSidePanel() {
 }
 
 /********************************************************
- * Toggle Sidebar
- ********************************************************/
-function toggleSidebar() {
-  const sidePanel = document.getElementById("sidePanel");
-  const toggleBtn = document.getElementById("sidebarToggle");
-
-  sidePanel.classList.toggle("collapsed");
-  toggleBtn.classList.toggle("collapsed");
-
-  if (sidePanel.classList.contains("collapsed")) {
-    document.querySelector("main").style.marginLeft = "60px";
-  } else {
-    document.querySelector("main").style.marginLeft = "280px";
-  }
-}
-
-/********************************************************
  * Utility Functions
  ********************************************************/
 function createCard(item, type) {
@@ -973,7 +990,7 @@ function createCard(item, type) {
     const offsetX = e.clientX - centerX;
     const offsetY = e.clientY - centerY;
 
-    const rotateMax = 1; // in degrees
+    const rotateMax = 1; // degrees
     const rotateX = (offsetY / (cardHeight / 2)) * rotateMax;
     const rotateY = -(offsetX / (cardWidth / 2)) * rotateMax;
 

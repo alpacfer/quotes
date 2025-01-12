@@ -6,7 +6,6 @@ const DB_NAME = "QuotesDatabase";
 const DB_VERSION = 1;
 const STORE_NAME = "quotes";
 
-// Open IndexedDB
 function openDB() {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION);
@@ -30,13 +29,11 @@ function openDB() {
   });
 }
 
-// Get Transaction
 function getTransaction(mode) {
   if (!db) throw new Error("DB not opened.");
   return db.transaction(STORE_NAME, mode).objectStore(STORE_NAME);
 }
 
-// Add Quote to DB
 function addQuoteToDB(quote) {
   return new Promise((resolve, reject) => {
     const store = getTransaction("readwrite");
@@ -46,7 +43,6 @@ function addQuoteToDB(quote) {
   });
 }
 
-// Update Quote in DB
 function updateQuoteInDB(quote) {
   return new Promise((resolve, reject) => {
     const store = getTransaction("readwrite");
@@ -56,7 +52,6 @@ function updateQuoteInDB(quote) {
   });
 }
 
-// Delete Quote from DB
 function deleteQuoteFromDB(id) {
   return new Promise((resolve, reject) => {
     const store = getTransaction("readwrite");
@@ -66,7 +61,6 @@ function deleteQuoteFromDB(id) {
   });
 }
 
-// Get All Quotes from DB
 function getAllQuotesFromDB() {
   return new Promise((resolve, reject) => {
     const store = getTransaction("readonly");
@@ -87,19 +81,18 @@ let currentViewQuoteId = null;
 /********************************************************
  * DOM Elements
  ********************************************************/
-// Side Panel
+// Sidebar & Flap
 const sidePanel = document.getElementById("sidePanel");
-const openSidebarBtn = document.getElementById("openSidebarBtn");
-const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+const sideFlap = document.getElementById("sideFlap");
+const sidebarHoverArea = document.getElementById("sidebarHoverArea");
 
+// Main Nav Buttons
 const homeSideBtn = document.getElementById("homeSideBtn");
-const top5BooksList = document.getElementById("top5BooksList");
-const showAllBooksBtn = document.getElementById("showAllBooks");
-const top5AuthorsList = document.getElementById("top5AuthorsList");
-const showAllAuthorsBtn = document.getElementById("showAllAuthors");
-const exportBtn = document.getElementById("exportBtn");
-const importBtn = document.getElementById("importBtn");
-const importFileInput = document.getElementById("importFileInput");
+const authorsSideBtn = document.getElementById("authorsSideBtn");
+const booksSideBtn = document.getElementById("booksSideBtn");
+
+// Toggle Theme
+const toggleThemeBtn = document.getElementById("toggleThemeBtn");
 
 // Main: Quotes Page
 const quotesPage = document.getElementById("quotesPage");
@@ -107,9 +100,9 @@ const quotesSearchInput = document.getElementById("quotesSearchInput");
 const clearSearchBtn = document.getElementById("clearSearchBtn");
 const addQuoteToggle = document.getElementById("addQuoteToggle");
 const defaultQuotesGrid = document.getElementById("defaultQuotesGrid");
-
-// Search Results
 const searchResultsGrid = document.getElementById("searchResultsGrid");
+
+// Search Sections
 const searchQuotesSection = document.getElementById("searchQuotesSection");
 const searchBooksSection = document.getElementById("searchBooksSection");
 const searchAuthorsSection = document.getElementById("searchAuthorsSection");
@@ -148,58 +141,76 @@ const quoteForm = document.getElementById("quoteForm");
 const quoteTextInput = document.getElementById("quoteText");
 const bookTitleInput = document.getElementById("bookTitle");
 const authorNameInput = document.getElementById("authorName");
+const tagsInput = document.getElementById("tagsInput");
 const discardBtn = document.getElementById("discardBtn");
 const confirmDeleteModal = document.getElementById("confirmDeleteModal");
 const deleteConfirmBtn = document.getElementById("deleteConfirmBtn");
 const deleteCancelBtn = document.getElementById("deleteCancelBtn");
 const viewQuoteModal = document.getElementById("viewQuoteModal");
 const viewQuoteText = document.getElementById("viewQuoteText");
-const viewQuoteBook = document.getElementById("viewQuoteBook");
-const viewQuoteAuthor = document.getElementById("viewQuoteAuthor");
-const viewEditBtn = document.getElementById("viewEditBtn");
-const viewDeleteBtn = document.getElementById("viewDeleteBtn");
+const viewAuthorBookCard = document.getElementById("viewAuthorBookCard");
+const viewAuthorBookTitle = document.getElementById("viewAuthorBookTitle");
+const viewAuthorBookAuthor = document.getElementById("viewAuthorBookAuthor");
+const viewQuoteTags = document.getElementById("viewQuoteTags");
+const copyQuoteBtn = document.getElementById("copyQuoteBtn");
 
-// DataLists for autocomplete
+// DataLists
 const booksDataList = document.getElementById("booksDataList");
 const authorsDataList = document.getElementById("authorsDataList");
+
+// Import / Export
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const importFileInput = document.getElementById("importFileInput");
 
 /********************************************************
  * Event Listeners
  ********************************************************/
-// Side Panel Navigation
-closeSidebarBtn.addEventListener("click", () => {
-  sidePanel.classList.add("collapsed");
-  openSidebarBtn.classList.remove("hidden");
-});
-openSidebarBtn.addEventListener("click", () => {
-  sidePanel.classList.remove("collapsed");
-  openSidebarBtn.classList.add("hidden");
-});
+// Sidebar Hover
+sidebarHoverArea.addEventListener("mouseenter", openSidePanel);
+sidePanel.addEventListener("mouseenter", openSidePanel);
+sidePanel.addEventListener("mouseleave", closeSidePanel);
 
+// Nav Buttons
 homeSideBtn.addEventListener("click", () => {
   showQuotesPage();
-  clearSearchField();
+  closeSidePanel();
 });
-showAllBooksBtn.addEventListener("click", showBooksPage);
-showAllAuthorsBtn.addEventListener("click", showAuthorsPage);
+authorsSideBtn.addEventListener("click", () => {
+  showAuthorsPage();
+  closeSidePanel();
+});
+booksSideBtn.addEventListener("click", () => {
+  showBooksPage();
+  closeSidePanel();
+});
+
+// Toggle Theme
+toggleThemeBtn.addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+});
+
+// Back Buttons
+backFromAuthors.addEventListener("click", handleBackClick);
+backFromBooks.addEventListener("click", handleBackClick);
+backFromAuthorDetail.addEventListener("click", handleBackClick);
+backFromBookDetail.addEventListener("click", handleBackClick);
+
+function handleBackClick() {
+  if (window.history.length > 1) {
+    history.back();
+  } else {
+    showQuotesPage();
+  }
+}
 
 // Quotes Page
 quotesSearchInput.addEventListener("input", debounce(handleSearchInput, 300));
+clearSearchBtn.addEventListener("click", clearSearchField);
 addQuoteToggle.addEventListener("click", () => {
   editingQuoteId = null;
   openAddQuoteModal();
 });
-clearSearchBtn.addEventListener("click", clearSearchField);
-
-// Authors & Books Nav
-backFromAuthors.addEventListener("click", showQuotesPage);
-backFromBooks.addEventListener("click", showQuotesPage);
-
-// Author Detail
-backFromAuthorDetail.addEventListener("click", showAuthorsPage);
-
-// Book Detail
-backFromBookDetail.addEventListener("click", showBooksPage);
 
 // Add/Edit Quote Modal
 discardBtn.addEventListener("click", () => {
@@ -212,43 +223,22 @@ quoteForm.addEventListener("submit", handleFormSubmit);
 deleteConfirmBtn.addEventListener("click", confirmDeletion);
 deleteCancelBtn.addEventListener("click", cancelDeletion);
 
-// View Quote Modal
-viewEditBtn.addEventListener("click", () => {
-  const quote = quotes.find((q) => q.id === currentViewQuoteId);
-  if (quote) {
-    editingQuoteId = quote.id;
-    quoteTextInput.value = quote.quoteText;
-    bookTitleInput.value = quote.bookTitle;
-    authorNameInput.value = quote.authorName;
-    closeViewQuoteModal();
-    openAddQuoteModal();
-  }
-});
-viewDeleteBtn.addEventListener("click", () => {
-  quoteToDeleteId = currentViewQuoteId;
-  openConfirmDeleteModal();
-  closeViewQuoteModal();
-});
+// View Quote Modal: Copy Button
+copyQuoteBtn.addEventListener("click", copyQuoteToClipboard);
 
-// Export / Import
-exportBtn.addEventListener("click", exportQuotes);
-importBtn.addEventListener("click", () => importFileInput.click());
-importFileInput.addEventListener("change", importQuotes);
-
-// Clicking outside => close only for certain modals
+// Window click for closing modals if clicked outside the content
 window.addEventListener("click", (event) => {
-  // Overlay clicked?
+  // If user clicked on the overlay itself
   if (event.target === modalOverlay) {
-    // For viewQuoteModal
+    // Close View Quote Modal if open
     if (!viewQuoteModal.classList.contains("hidden")) {
       closeViewQuoteModal();
     }
-    // For confirmDeleteModal
+    // Close Confirm Delete if open
     if (!confirmDeleteModal.classList.contains("hidden")) {
       cancelDeletion();
     }
-    // DO NOT close addQuoteMenu when clicked outside
-    // (per your requirement, add/edit modal does NOT dismiss)
+    // DO NOT close addQuoteMenu when clicked outside, as per earlier requirements
   }
 });
 
@@ -260,6 +250,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await openDB();
     await loadQuotesFromDB();
     showQuotesPage();
+    closeSidePanel();
   } catch (error) {
     console.error(error);
     alert("Failed to initialize the application.");
@@ -267,7 +258,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 /********************************************************
- * Page Navigation Functions
+ * Page Navigation
  ********************************************************/
 function showQuotesPage() {
   quotesPage.classList.remove("hidden");
@@ -276,7 +267,6 @@ function showQuotesPage() {
   authorDetailPage.classList.add("hidden");
   bookDetailPage.classList.add("hidden");
   hideOverlay();
-
   handleSearchInput();
 }
 
@@ -301,14 +291,16 @@ function showBooksPage() {
 }
 
 /********************************************************
- * Modal Handling Functions
+ * Modal Handling
  ********************************************************/
 function showOverlay() {
   modalOverlay.classList.remove("hidden");
+  document.body.style.overflow = "hidden";
 }
 
 function hideOverlay() {
   modalOverlay.classList.add("hidden");
+  document.body.style.overflow = "auto";
 }
 
 function openAddQuoteModal() {
@@ -323,38 +315,33 @@ function closeAddQuoteModal() {
 
 function openViewQuoteModal(id) {
   const quote = quotes.find((q) => q.id === id);
-  if (!quote) {
-    alert("Quote not found.");
-    return;
-  }
-  currentViewQuoteId = id;
+  if (!quote) return;
 
+  currentViewQuoteId = id;
   viewQuoteText.textContent = quote.quoteText;
-  viewQuoteBook.innerHTML = `<a href="#" id="viewBookLink">${quote.bookTitle}</a>`;
-  viewQuoteAuthor.innerHTML = `<a href="#" id="viewAuthorLink">${quote.authorName}</a>`;
+  viewAuthorBookTitle.textContent = quote.bookTitle;
+  viewAuthorBookAuthor.textContent = `By ${quote.authorName}`;
+
+  viewQuoteTags.innerHTML = "";
+  if (quote.tags && quote.tags.length) {
+    quote.tags.forEach((tag) => {
+      const tagEl = document.createElement("span");
+      tagEl.classList.add("tag");
+      tagEl.textContent = tag;
+      viewQuoteTags.appendChild(tagEl);
+    });
+  }
+
+  // Rebind the author/book card
+  viewAuthorBookCard.replaceWith(viewAuthorBookCard.cloneNode(true));
+  const newCard = document.getElementById("viewAuthorBookCard");
+  newCard.addEventListener("click", () => {
+    openAuthorDetailPage(quote.authorName);
+    closeViewQuoteModal();
+  }, { once: true });
 
   viewQuoteModal.classList.remove("hidden");
   showOverlay();
-
-  const viewBookLink = document.getElementById("viewBookLink");
-  const viewAuthorLink = document.getElementById("viewAuthorLink");
-  const newViewBookLink = viewBookLink.cloneNode(true);
-  const newViewAuthorLink = viewAuthorLink.cloneNode(true);
-
-  viewQuoteBook.replaceChild(newViewBookLink, viewBookLink);
-  viewQuoteAuthor.replaceChild(newViewAuthorLink, viewAuthorLink);
-
-  newViewBookLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    closeViewQuoteModal();
-    openBookDetailPage(quote.bookTitle);
-  });
-
-  newViewAuthorLink.addEventListener("click", (e) => {
-    e.preventDefault();
-    closeViewQuoteModal();
-    openAuthorDetailPage(quote.authorName);
-  });
 }
 
 function closeViewQuoteModal() {
@@ -362,6 +349,9 @@ function closeViewQuoteModal() {
   hideOverlay();
 }
 
+/********************************************************
+ * Confirm Deletion
+ ********************************************************/
 function openConfirmDeleteModal() {
   confirmDeleteModal.classList.remove("hidden");
   showOverlay();
@@ -372,9 +362,6 @@ function closeConfirmDeleteModal() {
   hideOverlay();
 }
 
-/********************************************************
- * Confirm Deletion
- ********************************************************/
 function confirmDeletion() {
   closeConfirmDeleteModal();
   if (quoteToDeleteId) {
@@ -400,7 +387,7 @@ function cancelDeletion() {
 }
 
 /********************************************************
- * Form Handling (Add/Edit Quote)
+ * Form Handling
  ********************************************************/
 function handleFormSubmit(e) {
   e.preventDefault();
@@ -411,6 +398,20 @@ async function saveQuote() {
   const quoteText = quoteTextInput.value.trim();
   const bookTitle = bookTitleInput.value.trim();
   const authorName = authorNameInput.value.trim();
+  const tagsRaw = tagsInput.value.trim();
+
+  let tags = [];
+  if (tagsRaw) {
+    tags = tagsRaw.split(",").map((t) => t.trim()).filter((t) => t);
+    tags = tags.slice(0, 5);
+    const tagPattern = /^[a-zA-Z0-9\-]+$/;
+    for (const tag of tags) {
+      if (!tagPattern.test(tag)) {
+        alert("Tags must be single words or compound words separated by hyphens.");
+        return;
+      }
+    }
+  }
 
   if (!quoteText || !bookTitle || !authorName) {
     alert("Please fill in all required fields.");
@@ -418,17 +419,17 @@ async function saveQuote() {
   }
 
   if (editingQuoteId) {
-    const index = quotes.findIndex((q) => q.id === editingQuoteId);
-    if (index !== -1) {
-      quotes[index].quoteText = quoteText;
-      quotes[index].bookTitle = bookTitle;
-      quotes[index].authorName = authorName;
+    const idx = quotes.findIndex((q) => q.id === editingQuoteId);
+    if (idx !== -1) {
+      quotes[idx].quoteText = quoteText;
+      quotes[idx].bookTitle = bookTitle;
+      quotes[idx].authorName = authorName;
+      quotes[idx].tags = tags;
       try {
-        await updateQuoteInDB(quotes[index]);
+        await updateQuoteInDB(quotes[idx]);
       } catch (error) {
         console.error(error);
         alert("Failed to update the quote.");
-        return;
       }
     }
     editingQuoteId = null;
@@ -438,6 +439,7 @@ async function saveQuote() {
       quoteText,
       bookTitle,
       authorName,
+      tags,
     };
     quotes.push(newQuote);
     try {
@@ -451,12 +453,11 @@ async function saveQuote() {
 
   resetForm();
   closeAddQuoteModal();
-  // After changes, re-render
   handleSearchInput();
   renderAuthors();
   renderBooks();
   updateSidePanel();
-  updateDataLists(); // Refresh datalist
+  updateDataLists();
 }
 
 function resetForm() {
@@ -465,7 +466,7 @@ function resetForm() {
 }
 
 /********************************************************
- * Load & Render Quotes
+ * Load & Render
  ********************************************************/
 async function loadQuotesFromDB() {
   try {
@@ -476,7 +477,7 @@ async function loadQuotesFromDB() {
     updateDataLists();
   } catch (error) {
     console.error(error);
-    alert("Failed to load quotes from the database.");
+    alert("Failed to load quotes from the DB.");
   }
 }
 
@@ -484,21 +485,19 @@ async function loadQuotesFromDB() {
  * Autocomplete DataLists
  ********************************************************/
 function updateDataLists() {
-  // Unique Books
-  const uniqueBooks = [...new Set(quotes.map(q => q.bookTitle.trim()))];
+  const uniqueBooks = [...new Set(quotes.map((q) => q.bookTitle.trim()))];
   booksDataList.innerHTML = uniqueBooks
-    .map(book => `<option value="${book}">`)
+    .map((b) => `<option value="${b}">`)
     .join("");
 
-  // Unique Authors
-  const uniqueAuthors = [...new Set(quotes.map(q => q.authorName.trim()))];
+  const uniqueAuthors = [...new Set(quotes.map((q) => q.authorName.trim()))];
   authorsDataList.innerHTML = uniqueAuthors
-    .map(author => `<option value="${author}">`)
+    .map((a) => `<option value="${a}">`)
     .join("");
 }
 
 /********************************************************
- * Search Integration (Quotes Page)
+ * Search
  ********************************************************/
 function handleSearchInput() {
   const query = quotesSearchInput.value.trim().toLowerCase();
@@ -516,7 +515,7 @@ function handleSearchInput() {
   }
 
   if (!query) {
-    if (quotes.length === 0) {
+    if (!quotes.length) {
       defaultQuotesGrid.innerHTML = "<p>No quotes added yet.</p>";
       return;
     }
@@ -547,7 +546,7 @@ function handleSearchInput() {
   );
 
   // Render quotes
-  if (matchedQuotes.length > 0) {
+  if (matchedQuotes.length) {
     searchQuotesSection.classList.remove("hidden");
     matchedQuotes.forEach((quote) => {
       const card = createCard(quote, "quote");
@@ -558,7 +557,7 @@ function handleSearchInput() {
   }
 
   // Render authors
-  if (matchedAuthors.length > 0) {
+  if (matchedAuthors.length) {
     searchAuthorsSection.classList.remove("hidden");
     matchedAuthors.forEach((authorName) => {
       const authorQuotes = quotes.filter((q) => q.authorName === authorName);
@@ -575,7 +574,7 @@ function handleSearchInput() {
   }
 
   // Render books
-  if (matchedBooks.length > 0) {
+  if (matchedBooks.length) {
     searchBooksSection.classList.remove("hidden");
     matchedBooks.forEach((bookTitle) => {
       const bookQuotes = quotes.filter((q) => q.bookTitle === bookTitle);
@@ -595,11 +594,11 @@ function handleSearchInput() {
 /********************************************************
  * Debounce
  ********************************************************/
-function debounce(func, delay) {
-  let timeout;
-  return function (...args) {
-    clearTimeout(timeout);
-    timeout = setTimeout(() => func.apply(this, args), delay);
+function debounce(fn, delay) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), delay);
   };
 }
 
@@ -617,7 +616,7 @@ function clearSearchField() {
 function renderAuthors() {
   authorsList.innerHTML = "";
 
-  if (quotes.length === 0) {
+  if (!quotes.length) {
     authorsList.innerHTML = "<p>No authors to display.</p>";
     return;
   }
@@ -626,11 +625,7 @@ function renderAuthors() {
   quotes.forEach((q) => {
     const key = q.authorName.trim().toLowerCase();
     if (!map[key]) {
-      map[key] = {
-        name: q.authorName.trim(),
-        quoteCount: 0,
-        books: new Set(),
-      };
+      map[key] = { name: q.authorName.trim(), quoteCount: 0, books: new Set() };
     }
     map[key].quoteCount++;
     map[key].books.add(q.bookTitle.trim());
@@ -652,7 +647,7 @@ function renderAuthors() {
 function renderBooks() {
   booksList.innerHTML = "";
 
-  if (quotes.length === 0) {
+  if (!quotes.length) {
     booksList.innerHTML = "<p>No books to display.</p>";
     return;
   }
@@ -698,7 +693,7 @@ function openAuthorDetailPage(authorName) {
   authorNameDetail.textContent = authorName;
 
   const booksSet = new Set(authorQuotes.map((q) => q.bookTitle));
-  if (booksSet.size > 0) {
+  if (booksSet.size) {
     authorBooksList.innerHTML = "";
     booksSet.forEach((bookTitle) => {
       const bookQuotes = quotes.filter((q) => q.bookTitle === bookTitle);
@@ -714,7 +709,7 @@ function openAuthorDetailPage(authorName) {
     authorBooksList.innerHTML = "<p>No books available for this author.</p>";
   }
 
-  if (authorQuotes.length > 0) {
+  if (authorQuotes.length) {
     authorQuotesGrid.innerHTML = "";
     authorQuotes.forEach((quote) => {
       const card = createCard(quote, "quote");
@@ -740,7 +735,7 @@ function openBookDetailPage(bookTitle) {
   const bookQuotes = quotes.filter(
     (q) => q.bookTitle.toLowerCase() === bookTitle.toLowerCase()
   );
-  if (bookQuotes.length === 0) {
+  if (!bookQuotes.length) {
     bookTitleDetail.textContent = bookTitle;
     bookAuthorDetail.textContent = "By Unknown";
     bookQuotesGrid.innerHTML = "<p>No quotes available for this book.</p>";
@@ -751,10 +746,10 @@ function openBookDetailPage(bookTitle) {
   bookTitleDetail.textContent = book.bookTitle;
   bookAuthorDetail.textContent = `By ${book.authorName}`;
 
-  if (bookQuotes.length > 0) {
+  if (bookQuotes.length) {
     bookQuotesGrid.innerHTML = "";
-    bookQuotes.forEach((quote) => {
-      const card = createCard(quote, "quote");
+    bookQuotes.forEach((qt) => {
+      const card = createCard(qt, "quote");
       bookQuotesGrid.appendChild(card);
     });
   } else {
@@ -766,7 +761,7 @@ function openBookDetailPage(bookTitle) {
  * Export & Import
  ********************************************************/
 function exportQuotes() {
-  if (quotes.length === 0) {
+  if (!quotes.length) {
     alert("No quotes to export.");
     return;
   }
@@ -789,14 +784,14 @@ function exportQuotes() {
   URL.revokeObjectURL(url);
 }
 
-function importQuotes(event) {
-  const file = event.target.files[0];
+function importQuotes(e) {
+  const file = e.target.files[0];
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = async function (e) {
-    const content = e.target.result;
-    const lines = content.split("\n").filter((line) => line.trim() !== "");
+  reader.onload = async function (ev) {
+    const content = ev.target.result;
+    const lines = content.split("\n").filter((line) => line.trim());
 
     if (lines.length < 2) {
       alert("CSV file does not contain data.");
@@ -839,26 +834,26 @@ function importQuotes(event) {
             q.authorName === authorName
         );
         if (!duplicate) {
-          const newQuote = {
+          newQuotes.push({
             id: crypto.randomUUID(),
             quoteText,
             bookTitle,
             authorName,
-          };
-          newQuotes.push(newQuote);
+            tags: [],
+          });
         }
       }
     }
 
-    if (newQuotes.length === 0) {
+    if (!newQuotes.length) {
       alert("No new quotes or all duplicates.");
       return;
     }
 
-    for (const quote of newQuotes) {
+    for (const qt of newQuotes) {
       try {
-        await addQuoteToDB(quote);
-        quotes.push(quote);
+        await addQuoteToDB(qt);
+        quotes.push(qt);
       } catch (error) {
         console.error(`Failed to add quote: ${error}`);
       }
@@ -880,7 +875,7 @@ function importQuotes(event) {
 }
 
 /********************************************************
- * Parse CSV Line
+ * CSV Parsing
  ********************************************************/
 function parseCSVLine(line) {
   const result = [];
@@ -908,92 +903,31 @@ function parseCSVLine(line) {
 }
 
 /********************************************************
- * Side Panel Update
+ * Sidebar Update
  ********************************************************/
 function updateSidePanel() {
-  // Top 5 Books
-  top5BooksList.innerHTML = "";
-  if (quotes.length > 0) {
-    const bookCountMap = {};
-    quotes.forEach((q) => {
-      const key = q.bookTitle.trim().toLowerCase();
-      if (!bookCountMap[key]) {
-        bookCountMap[key] = {
-          title: q.bookTitle.trim(),
-          count: 0,
-        };
-      }
-      bookCountMap[key].count++;
-    });
-    const sortedBooks = Object.values(bookCountMap).sort(
-      (a, b) => b.count - a.count
-    );
-    const top5 = sortedBooks.slice(0, 5);
-
-    top5.forEach((bookObj) => {
-      const li = document.createElement("li");
-      li.textContent = `${bookObj.title} (${bookObj.count})`;
-      li.classList.add("side-list-item");
-      li.addEventListener("click", () => {
-        openBookDetailPage(bookObj.title);
-      });
-      top5BooksList.appendChild(li);
-    });
-  }
-
-  // Top 5 Authors
-  top5AuthorsList.innerHTML = "";
-  if (quotes.length > 0) {
-    const authorCountMap = {};
-    quotes.forEach((q) => {
-      const key = q.authorName.trim().toLowerCase();
-      if (!authorCountMap[key]) {
-        authorCountMap[key] = {
-          name: q.authorName.trim(),
-          count: 0,
-        };
-      }
-      authorCountMap[key].count++;
-    });
-    const sortedAuthors = Object.values(authorCountMap).sort(
-      (a, b) => b.count - a.count
-    );
-    const top5Authors = sortedAuthors.slice(0, 5);
-
-    top5Authors.forEach((authorObj) => {
-      const li = document.createElement("li");
-      li.textContent = `${authorObj.name} (${authorObj.count})`;
-      li.classList.add("side-list-item");
-      li.addEventListener("click", () => {
-        openAuthorDetailPage(authorObj.name);
-      });
-      top5AuthorsList.appendChild(li);
-    });
-  }
+  // Potential dynamic updates in the future
 }
 
 /********************************************************
- * Utility Functions
+ * createCard Utility
  ********************************************************/
 function createCard(item, type) {
   const card = document.createElement("div");
   card.classList.add("card");
 
-  // 3D hover tilt
+  // 3D tilt
   card.addEventListener("mousemove", (e) => {
     const rect = card.getBoundingClientRect();
     const cardWidth = rect.width;
     const cardHeight = rect.height;
     const centerX = rect.left + cardWidth / 2;
     const centerY = rect.top + cardHeight / 2;
-
     const offsetX = e.clientX - centerX;
     const offsetY = e.clientY - centerY;
-
-    const rotateMax = 1; // degrees
+    const rotateMax = 1;
     const rotateX = (offsetY / (cardHeight / 2)) * rotateMax;
     const rotateY = -(offsetX / (cardWidth / 2)) * rotateMax;
-
     card.style.transform = `translateZ(3px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
   });
 
@@ -1005,51 +939,44 @@ function createCard(item, type) {
     card.classList.add("quote-card");
     card.innerHTML = `
       <p class="quote-text">${item.quoteText}</p>
-      <div class="card-footer">
-        <div class="quote-details">
-          <a href="#" class="quote-book">${item.bookTitle}</a>
-          <a href="#" class="quote-author">${item.authorName}</a>
-        </div>
-        <div class="actions">
-          <button class="edit-btn" data-id="${item.id}" title="Edit">
-            <span class="material-icons">edit</span>
-          </button>
-          <button class="delete-btn" data-id="${item.id}" title="Delete">
-            <span class="material-icons">delete</span>
-          </button>
-        </div>
+      <div class="quote-details">
+        <span class="quote-book">${item.bookTitle}</span>
+        <span class="quote-author">${item.authorName}</span>
+      </div>
+      <div class="actions">
+        <button class="edit-btn" data-id="${item.id}" title="Edit">
+          <span class="material-icons">edit</span>
+        </button>
+        <button class="delete-btn" data-id="${item.id}" title="Delete">
+          <span class="material-icons">delete</span>
+        </button>
       </div>
     `;
 
-    card.addEventListener("click", (e) => {
-      if (e.target.closest("button")) return;
-      openViewQuoteModal(item.id);
-    });
-
     const editBtn = card.querySelector(".edit-btn");
+    const deleteBtn = card.querySelector(".delete-btn");
+    const bookEl = card.querySelector(".quote-book");
+    const authorEl = card.querySelector(".quote-author");
+
     editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       editQuote(e);
     });
-
-    const deleteBtn = card.querySelector(".delete-btn");
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       removeQuote(e);
     });
-
-    const bookEl = card.querySelector(".quote-book");
     bookEl.addEventListener("click", (e) => {
-      e.preventDefault();
       e.stopPropagation();
       openBookDetailPage(item.bookTitle);
     });
-
-    const authorEl = card.querySelector(".quote-author");
     authorEl.addEventListener("click", (e) => {
-      e.preventDefault();
       e.stopPropagation();
       openAuthorDetailPage(item.authorName);
+    });
+
+    card.addEventListener("click", () => {
+      openViewQuoteModal(item.id);
     });
   } else if (type === "author") {
     card.classList.add("author-card");
@@ -1076,17 +1003,19 @@ function createCard(item, type) {
   return card;
 }
 
+/********************************************************
+ * Edit/Delete Utility
+ ********************************************************/
 function editQuote(e) {
   const quoteId = e.target.closest("button").getAttribute("data-id");
   const quoteToEdit = quotes.find((q) => q.id === quoteId);
-  if (!quoteToEdit) {
-    alert("Quote not found.");
-    return;
-  }
+  if (!quoteToEdit) return;
+
   editingQuoteId = quoteId;
   quoteTextInput.value = quoteToEdit.quoteText;
   bookTitleInput.value = quoteToEdit.bookTitle;
   authorNameInput.value = quoteToEdit.authorName;
+  tagsInput.value = quoteToEdit.tags ? quoteToEdit.tags.join(", ") : "";
   openAddQuoteModal();
 }
 
@@ -1094,4 +1023,34 @@ function removeQuote(e) {
   const quoteId = e.target.closest("button").getAttribute("data-id");
   quoteToDeleteId = quoteId;
   openConfirmDeleteModal();
+}
+
+/********************************************************
+ * Sidebar Hover
+ ********************************************************/
+function openSidePanel() {
+  sidePanel.classList.remove("collapsed");
+  sidePanel.classList.add("open");
+}
+
+function closeSidePanel() {
+  sidePanel.classList.add("collapsed");
+  sidePanel.classList.remove("open");
+}
+
+/********************************************************
+ * Copy Quote
+ ********************************************************/
+function copyQuoteToClipboard() {
+  const quote = quotes.find((q) => q.id === currentViewQuoteId);
+  if (!quote) return;
+
+  const textToCopy = `"${quote.quoteText}"\n— ${quote.authorName}, "${quote.bookTitle}"`;
+  navigator.clipboard.writeText(textToCopy)
+    .then(() => {
+      console.log("Quote copied to clipboard.");
+    })
+    .catch((err) => {
+      console.error("Could not copy text:", err);
+    });
 }

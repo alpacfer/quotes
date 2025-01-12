@@ -12,52 +12,53 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Button to open side panel when hidden -->
-  <button id="openSidebarBtn" class="hidden">
-    <span class="material-icons">menu</span>
-  </button>
+  <!-- Sidebar Hover Area -->
+  <div id="sidebarHoverArea" class="sidebar-hover-area"></div>
+
+  <!-- Side Flap -->
+  <div id="sideFlap" class="side-flap">
+    <span class="material-icons">chevron_right</span>
+  </div>
 
   <!-- Side Panel -->
-  <div id="sidePanel">
-    <!-- Close side panel button -->
-    <button id="closeSidebarBtn" class="side-button close-panel-btn" title="Hide Panel">
-      <span class="material-icons">chevron_left</span>
-    </button>
-
+  <div id="sidePanel" class="collapsed">
+    <!-- Home Button -->
     <button id="homeSideBtn" class="side-button">
       <span class="material-icons">home</span> Home
     </button>
 
-    <!-- Top 5 Books -->
-    <div class="side-section">
-      <h3>Top 5 Books</h3>
-      <ul id="top5BooksList" class="side-list"></ul>
-      <button id="showAllBooks" class="side-button">
-        <span class="material-icons">book</span> Show All
-      </button>
-    </div>
+    <!-- Authors Button -->
+    <button id="authorsSideBtn" class="side-button">
+      <span class="material-icons">person</span> Authors
+    </button>
 
-    <!-- Top 5 Authors -->
-    <div class="side-section">
-      <h3>Top 5 Authors</h3>
-      <ul id="top5AuthorsList" class="side-list"></ul>
-      <button id="showAllAuthors" class="side-button">
-        <span class="material-icons">person</span> Show All
-      </button>
-    </div>
+    <!-- Books Button -->
+    <button id="booksSideBtn" class="side-button">
+      <span class="material-icons">book</span> Books
+    </button>
 
     <!-- Import / Export -->
     <div class="side-section import-export-section">
+      <!-- Toggle Light/Dark Mode -->
+      <button id="toggleThemeBtn" class="side-button">
+        <span class="material-icons">brightness_4</span> Toggle Theme
+      </button>
+
+      <!-- Export Button -->
       <button id="exportBtn" class="side-button">
         <span class="material-icons">file_download</span> Export
       </button>
+
+      <!-- Import Button -->
       <button id="importBtn" class="side-button">
         <span class="material-icons">file_upload</span> Import
       </button>
+      
       <!-- Hidden File Input for Import -->
       <input type="file" id="importFileInput" accept=".csv" class="hidden" />
     </div>
   </div>
+
 
   <main>
     <!-- Quotes Page (Default) -->
@@ -110,7 +111,7 @@
     <!-- Authors Page -->
     <div id="authorsPage" class="hidden">
       <button id="backFromAuthors" class="back-button">
-        <span class="material-icons">arrow_back</span> Back to Quotes
+        <span class="material-icons">arrow_back</span> Back
       </button>
       <h2>Authors</h2>
       <div id="authorsList" class="cards-container grid"></div>
@@ -119,7 +120,7 @@
     <!-- Books Page -->
     <div id="booksPage" class="hidden">
       <button id="backFromBooks" class="back-button">
-        <span class="material-icons">arrow_back</span> Back to Quotes
+        <span class="material-icons">arrow_back</span> Back
       </button>
       <h2>Books</h2>
       <div id="booksList" class="cards-container grid"></div>
@@ -128,7 +129,7 @@
     <!-- Author Detail Page -->
     <div id="authorDetailPage" class="hidden">
       <button id="backFromAuthorDetail" class="back-button">
-        <span class="material-icons">arrow_back</span> Back to Authors
+        <span class="material-icons">arrow_back</span> Back
       </button>
       <div class="detail-content">
         <h2 id="authorNameDetail"></h2>
@@ -142,7 +143,7 @@
     <!-- Book Detail Page -->
     <div id="bookDetailPage" class="hidden">
       <button id="backFromBookDetail" class="back-button">
-        <span class="material-icons">arrow_back</span> Back to Books
+        <span class="material-icons">arrow_back</span> Back
       </button>
       <div class="detail-content">
         <h2 id="bookTitleDetail"></h2>
@@ -171,9 +172,13 @@
         <input list="authorsDataList" type="text" id="authorName" required />
         <datalist id="authorsDataList"></datalist>
 
-        <div class="form-footer">
-          <button type="submit" id="saveBtn">Save</button>
-          <button type="button" id="discardBtn">Discard</button>
+        <!-- Tags Input -->
+        <label for="tagsInput">Tags (up to 5, separated by commas):</label>
+        <input type="text" id="tagsInput" placeholder="e.g., inspirational, life-lessons" />
+
+        <div class="form-footer right-aligned">
+          <button type="submit" id="saveBtn" class="primary-btn">Save</button>
+          <button type="button" id="discardBtn" class="secondary-btn">Discard</button>
         </div>
       </form>
     </div>
@@ -182,11 +187,11 @@
     <div id="confirmDeleteModal" class="modal hidden">
       <h3>Confirm Deletion</h3>
       <p>Are you sure you want to delete this quote?</p>
-      <div class="form-footer">
-        <button id="deleteConfirmBtn">
+      <div class="form-footer right-aligned">
+        <button id="deleteConfirmBtn" class="danger-btn">
           <span class="material-icons">delete</span> Delete
         </button>
-        <button id="deleteCancelBtn">
+        <button id="deleteCancelBtn" class="secondary-btn">
           <span class="material-icons">close</span> Cancel
         </button>
       </div>
@@ -195,17 +200,26 @@
     <!-- View Quote Modal -->
     <div id="viewQuoteModal" class="modal hidden">
       <div class="view-content">
-        <p id="viewQuoteText"></p>
-        <div class="view-details">
-          <p id="viewQuoteBook" class="quote-book"></p>
-          <p id="viewQuoteAuthor" class="quote-author"></p>
+        <div class="quote-main">
+          <p id="viewQuoteText"></p>
+          <button id="copyQuoteBtn" class="copy-button" title="Copy Quote">
+            <span class="material-icons">content_copy</span>
+          </button>
+        </div>
+        <div class="quote-details-container">
+          <div class="quote-author-book-card" id="viewAuthorBookCard">
+            <!-- Author and Book Info -->
+            <h3 id="viewAuthorBookTitle"></h3>
+            <p id="viewAuthorBookAuthor"></p>
+          </div>
+          <div class="quote-tags" id="viewQuoteTags"></div>
         </div>
       </div>
-      <div class="form-footer">
-        <button id="viewEditBtn">
+      <div class="form-footer right-aligned">
+        <button id="viewEditBtn" class="primary-btn">
           <span class="material-icons">edit</span> Edit
         </button>
-        <button id="viewDeleteBtn">
+        <button id="viewDeleteBtn" class="danger-btn">
           <span class="material-icons">delete</span> Delete
         </button>
       </div>

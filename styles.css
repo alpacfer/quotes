@@ -1,12 +1,12 @@
-/* Root Variables */
+/* Base Variables (Light Theme) */
 :root {
-  --background-color: #f5f5f5;
+  --background-color: #ffffff;
   --primary-color: #2c3e50;
-  --accent-color: #f1c40f;
+  --accent-color: #e67e22; /* orange */
   --text-color: #333333;
   --secondary-text: #7f8c8d;
   --button-bg: #34495e;
-  --button-hover: #3b5568;
+  --button-hover: #445f79;
   --danger-color: #c0392b;
   --danger-hover: #a93226;
   --box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
@@ -16,19 +16,39 @@
 
   /* Distinct Card Colors */
   --quote-card-bg: #ffffff;
-  --author-card-bg: #e8f6f3;
-  --book-card-bg: #f9ebea;
+  --author-card-bg: #eefdfb; /* Lighter teal for authors */
+  --book-card-bg: #feecee;   /* Light pink for books */
+
+  --modal-width: 600px;
+  --modal-max-width: 90%;
 }
 
-/* Body */
+/* Dark Theme */
+.dark-mode {
+  --background-color: #1a1a1d;
+  --primary-color: #2e2f33;
+  --accent-color: #ff9221;
+  --text-color: #d3d3d3;
+  --secondary-text: #888888;
+  --button-bg: #3f4045;
+  --button-hover: #53555b;
+  --danger-color: #b03a2e;
+  --danger-hover: #943126;
+  --quote-card-bg: #2a2a2a;
+  --author-card-bg: #36403f;
+  --book-card-bg: #3e3334;
+  --box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+/* Base */
 body {
   display: flex;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
-  margin: 0;
-  padding: 0;
   overflow-x: hidden;
 }
 
@@ -38,6 +58,18 @@ html {
 
 .hidden {
   display: none !important;
+}
+
+/****************************************************************
+ * Sidebar Hover Area
+ ****************************************************************/
+.sidebar-hover-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  z-index: 900;
 }
 
 /****************************************************************
@@ -51,53 +83,57 @@ html {
   box-shadow: var(--box-shadow);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
   position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  z-index: 1000; /* below modal overlay so overlay covers it */
+  z-index: 1000;
   transition: transform 0.3s ease;
+  transform: translateX(-100%);
+}
+
+#sidePanel.open {
+  transform: translateX(0);
 }
 
 #sidePanel.collapsed {
-  transform: translateX(-100%); /* fully hidden off-screen */
-}
-
-/* Close Panel Button */
-.close-panel-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
+  transform: translateX(-100%);
 }
 
 /****************************************************************
- * Open Sidebar Button
+ * Side Flap
  ****************************************************************/
-#openSidebarBtn {
+.side-flap {
   position: fixed;
-  top: 20px;
-  left: 20px;
-  z-index: 1001;
+  top: 50%;
+  left: 0;
+  transform: translate(-100%, -50%);
+  width: 30px;
+  height: 100px;
   background-color: var(--primary-color);
   color: #ffffff;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  cursor: pointer;
-  box-shadow: var(--box-shadow);
+  border-top-right-radius: 15px;
+  border-bottom-right-radius: 15px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  z-index: 1100; /* Above side panel and hover area */
 }
 
-#openSidebarBtn:hover {
-  background-color: var(--button-hover);
+.side-flap:hover {
+  transform: translate(0, -50%);
 }
 
-/* Side Buttons */
+.side-flap .material-icons {
+  font-size: 24px;
+}
+
+/****************************************************************
+ * Navigation Buttons
+ ****************************************************************/
 .side-button {
   border: none;
   border-radius: 5px;
@@ -108,43 +144,23 @@ html {
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
   transition: background-color 0.3s ease;
+  width: 100%;
 }
 
 .side-button:hover {
   background-color: var(--button-hover);
 }
 
-.side-section {
+/****************************************************************
+ * Import / Export, Toggle Theme
+ ****************************************************************/
+.toggle-theme-section,
+.import-export-section {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-
-.side-section h3 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-.side-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.side-list li {
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 3px;
-  transition: background-color 0.3s ease;
-}
-
-.side-list li:hover {
-  background-color: #3b5568;
-}
-
-.import-export-section {
   margin-top: auto;
 }
 
@@ -152,7 +168,7 @@ html {
  * Main Content
  ****************************************************************/
 main {
-  margin-left: 280px;
+  margin-left: 30px;
   padding: 20px;
   box-sizing: border-box;
   flex: 1;
@@ -161,13 +177,12 @@ main {
   transition: margin-left 0.3s ease;
 }
 
-/* If side panel is collapsed, we shift main content back */
-#sidePanel.collapsed ~ main {
-  margin-left: 0;
+#sidePanel.open ~ main {
+  margin-left: 280px;
 }
 
 /****************************************************************
- * Quotes Page Layout
+ * Quotes Page
  ****************************************************************/
 .quotes-header {
   display: flex;
@@ -191,9 +206,10 @@ main {
 #quotesSearchInput {
   width: 100%;
   padding: 10px 40px 10px 10px;
-  font-size: 1rem;
   border: 1px solid var(--secondary-text);
   border-radius: 5px;
+  background-color: var(--quote-card-bg);
+  color: var(--text-color);
   transition: border-color 0.3s ease;
   box-sizing: border-box;
 }
@@ -243,20 +259,6 @@ main {
 }
 
 /****************************************************************
- * Search Sections in Quotes Page
- ****************************************************************/
-.search-section {
-  margin-bottom: 30px;
-}
-
-.search-section h3 {
-  margin: 0;
-  margin-bottom: 10px;
-  color: var(--primary-color);
-  font-size: 1.5rem;
-}
-
-/****************************************************************
  * Cards Container
  ****************************************************************/
 .cards-container {
@@ -267,56 +269,46 @@ main {
 
 .cards-container.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 25px;
-  align-items: stretch;
-
-  /* 3D perspective for tilt effect */
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  align-items: flex-start;
   perspective: 800px;
 }
 
-.search-results-grid {
-  margin-top: 20px;
-}
-
 /****************************************************************
- * Card Styles
+ * Fixed-size Quote Cards
  ****************************************************************/
 .card {
   background-color: var(--quote-card-bg);
   border: 1px solid var(--secondary-text);
   border-radius: 5px;
-  padding: 20px;
   box-shadow: var(--box-shadow);
   position: relative;
   cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  transform-style: preserve-3d;
+}
+
+.quote-card {
+  width: 100%;
+  height: 180px; /* Fixed height for quote cards */
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  overflow: hidden;
-  height: 100%;
+  justify-content: flex-start;
+  padding: 20px;
   box-sizing: border-box;
-
-  /* 3D transform style */
-  transform-style: preserve-3d;
-  transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
 .card:hover {
-  background-color: #f0f0f0;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
-/* Quote Cards */
-.quote-card {
-  background-color: var(--quote-card-bg);
-}
-
-.quote-card .quote-text {
-  font-size: 1rem;
+.quote-text {
+  font-size: 0.95rem;
   color: var(--secondary-text);
-  margin: 0;
-  margin-bottom: 10px;
+  margin: 0 0 10px 0;
   text-align: justify;
+  line-height: 1.3;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -324,124 +316,126 @@ main {
   -webkit-box-orient: vertical;
 }
 
-.quote-card .card-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.quote-card .quote-details {
+.quote-details {
   display: flex;
   flex-direction: column;
+  margin-top: auto;
+  gap: 2px;
 }
 
-.quote-card .quote-book,
-.quote-card .quote-author {
+.quote-book {
+  font-size: 1.05rem;
   font-weight: bold;
-  color: var(--primary-color);
-  cursor: pointer;
-  text-decoration: none;
+  color: var(--accent-color);
+  line-height: 1.3;
+  transition: text-decoration 0.2s ease;
 }
 
-/* Underline on hover to indicate link */
-.quote-card .quote-book:hover,
-.quote-card .quote-author:hover {
+.quote-author {
+  font-size: 1rem;
+  font-weight: normal;
+  color: var(--accent-color);
+  line-height: 1.3;
+  transition: text-decoration 0.2s ease;
+}
+
+/* Underline on hover for clickable items */
+.quote-book:hover,
+.quote-author:hover {
   text-decoration: underline;
 }
 
-.quote-card .quote-book {
-  margin-bottom: 5px;
-  font-size: 1.1rem;
-}
-
-.quote-card .quote-author {
-  font-size: 1rem;
-}
-
-/* Author and Book Cards */
-.author-card {
-  background-color: var(--author-card-bg);
-}
-
-.author-card h3,
-.book-card h3 {
-  margin: 0;
-  color: var(--primary-color);
-  font-size: 1.1rem;
-  margin-bottom: 5px;
-}
-
-.author-card p,
-.book-card p {
-  margin: 3px 0;
-  line-height: 1.3;
-  color: var(--secondary-text);
-  font-size: 0.85rem;
+/****************************************************************
+ * Author and Book Cards
+ ****************************************************************/
+.author-card,
+.book-card {
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: var(--box-shadow);
+  background-color: var(--author-card-bg); /* overwritten if .book-card */
+  line-height: 1.4;
 }
 
 .book-card {
   background-color: var(--book-card-bg);
 }
 
-/* Edit/Delete Actions */
+.author-card h3,
+.book-card h3 {
+  margin: 0 0 5px 0;
+  color: var(--accent-color);
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.author-card p,
+.book-card p {
+  margin: 2px 0;
+  color: var(--secondary-text);
+  font-size: 0.85rem;
+}
+
+/****************************************************************
+ * Actions (Edit/Delete) in Quote Cards
+ ****************************************************************/
 .actions {
   position: absolute;
   bottom: 10px;
   right: 10px;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   z-index: 10;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-.card:hover .actions {
+.quote-card:hover .actions {
   opacity: 1;
   visibility: visible;
 }
 
 .actions button {
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
   border: none;
   border-radius: 50%;
-  cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
-.edit-btn {
-  background-color: var(--accent-color);
-  color: #ffffff;
+/* For better contrast, use a distinct background for edit/delete icons */
+.actions .edit-btn {
+  background-color: #2e86c1; /* a readable contrast color in both themes */
 }
 
-.edit-btn:hover {
-  background-color: #d4ac0d;
+.actions .edit-btn:hover {
+  background-color: #1f618d;
 }
 
-.delete-btn {
-  background-color: var(--danger-color);
-  color: #ffffff;
+.actions .delete-btn {
+  background-color: #c0392b;
 }
 
-.delete-btn:hover {
-  background-color: var(--danger-hover);
+.actions .delete-btn:hover {
+  background-color: #a93226;
 }
 
 /****************************************************************
  * Back Button
  ****************************************************************/
 .back-button {
-  background-color: var(--primary-color);
+  background-color: var(--button-bg);
   color: #ffffff;
   border: none;
   border-radius: 5px;
-  padding: 10px 15px;
+  padding: 8px 12px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -449,12 +443,12 @@ main {
   transition: background-color 0.3s ease;
 }
 
-.back-button:hover {
-  background-color: var(--button-hover);
-}
-
 .back-button .material-icons {
   margin-right: 5px;
+}
+
+.back-button:hover {
+  background-color: var(--button-hover);
 }
 
 /****************************************************************
@@ -467,7 +461,7 @@ main {
   width: 100%;
   height: 100%;
   background: var(--modal-overlay-bg);
-  z-index: 2000; /* Above side panel */
+  z-index: 2000;
 }
 
 /****************************************************************
@@ -478,14 +472,71 @@ main {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: #ffffff;
+  background-color: var(--quote-card-bg);
   border-radius: 10px;
   box-shadow: var(--box-shadow);
-  width: 90%;
-  max-width: 600px;
+  width: var(--modal-width);
+  max-width: var(--modal-max-width);
   padding: 25px;
   text-align: left;
-  z-index: 3000; /* Above overlay */
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/****************************************************************
+ * Right-Aligned
+ ****************************************************************/
+.form-footer.right-aligned {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+/****************************************************************
+ * Buttons (Primary, Secondary, Danger)
+ ****************************************************************/
+.primary-btn {
+  background-color: var(--accent-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.primary-btn:hover {
+  background-color: #cf6e1d;
+}
+
+.secondary-btn {
+  background-color: var(--secondary-text);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.secondary-btn:hover {
+  background-color: #6c7a7a;
+}
+
+.danger-btn {
+  background-color: var(--danger-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.danger-btn:hover {
+  background-color: var(--danger-hover);
 }
 
 /****************************************************************
@@ -495,29 +546,28 @@ main {
   display: flex;
   flex-direction: column;
   gap: 15px;
-  padding-top: 10px;
 }
 
 #quoteForm label {
   font-weight: bold;
   color: var(--text-color);
-  text-align: left;
 }
 
 #quoteForm textarea,
 #quoteForm input {
-  font-size: 16px;
+  font-size: 14px;
   border: 1px solid var(--secondary-text);
   border-radius: 5px;
-  padding: 10px;
+  padding: 8px;
   width: 100%;
   box-sizing: border-box;
+  background-color: var(--background-color);
+  color: var(--text-color);
 }
 
 #quoteForm textarea {
   resize: none;
-  height: 120px;
-  text-align: left;
+  height: 90px;
   margin: 0;
 }
 
@@ -525,46 +575,6 @@ main {
 #quoteForm input:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: none;
-}
-
-.form-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.form-footer button {
-  width: 120px;
-  border: none;
-  border-radius: 5px;
-  padding: 10px;
-  cursor: pointer;
-  font-size: 16px;
-}
-
-.form-footer button:focus {
-  outline: none;
-  box-shadow: none;
-}
-
-#saveBtn {
-  background-color: var(--primary-color);
-  color: #ffffff;
-}
-
-#saveBtn:hover {
-  background-color: var(--button-hover);
-}
-
-#discardBtn {
-  background-color: var(--secondary-text);
-  color: #ffffff;
-}
-
-#discardBtn:hover {
-  background-color: #95a5a6;
 }
 
 /****************************************************************
@@ -578,116 +588,116 @@ main {
 #confirmDeleteModal h3 {
   color: var(--primary-color);
   margin-bottom: 15px;
-  font-size: 1.8rem;
+  font-size: 1.3rem;
 }
 
 #confirmDeleteModal p {
   color: var(--secondary-text);
   margin-bottom: 25px;
-  font-size: 1.1rem;
-}
-
-#confirmDeleteModal .form-footer {
-  justify-content: center;
-}
-
-#deleteConfirmBtn {
-  background-color: var(--danger-color);
-  color: #ffffff;
-}
-
-#deleteConfirmBtn:hover {
-  background-color: var(--danger-hover);
-}
-
-#deleteCancelBtn {
-  background-color: var(--secondary-text);
-  color: #ffffff;
-}
-
-#deleteCancelBtn:hover {
-  background-color: #95a5a6;
-}
-
-#deleteConfirmBtn .material-icons,
-#deleteCancelBtn .material-icons {
-  margin-right: 5px;
+  font-size: 1rem;
 }
 
 /****************************************************************
  * View Quote Modal
  ****************************************************************/
 #viewQuoteModal {
-  max-width: 600px;
+  border: 2px solid var(--primary-color);
 }
 
 .view-content {
-  max-height: 300px;
-  overflow-y: auto;
-  padding-right: 10px;
-}
-
-.view-content p {
-  font-size: 1rem;
-  color: var(--secondary-text);
-  margin-bottom: 15px;
-  text-align: justify;
-}
-
-.view-content .quote-book a,
-.view-content .quote-author a {
-  text-decoration: none;
-  font-weight: bold;
-  color: var(--primary-color);
-}
-
-.view-content .quote-book a:hover,
-.view-content .quote-author a:hover {
-  text-decoration: underline;
-  color: var(--primary-color);
-}
-
-#viewQuoteModal .form-footer {
   display: flex;
-  justify-content: center;
   gap: 20px;
-  margin-top: 20px;
+  flex-wrap: wrap;
 }
 
-#viewEditBtn {
+.quote-main {
+  flex: 2;
+  position: relative;
+  padding: 10px;
+  border: 1px solid var(--secondary-text);
+  border-radius: 5px;
+}
+
+.quote-main p {
+  font-size: 0.95rem;
+  color: var(--text-color);
+  margin: 0;
+  text-align: justify;
+  line-height: 1.4;
+}
+
+/* Copy button hidden by default, visible on hover */
+.copy-button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: var(--accent-color);
+  border: none;
+  border-radius: 50%;
+  padding: 5px;
+  cursor: pointer;
+  color: #ffffff;
+  display: none;
+  transition: background-color 0.3s ease;
+}
+
+.quote-main:hover .copy-button {
+  display: block;
+}
+
+.copy-button:hover {
+  background-color: #cf6e1d;
+}
+
+.quote-details-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quote-author-book-card {
+  background-color: var(--author-card-bg);
+  border: 1px solid var(--secondary-text);
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: var(--box-shadow);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.quote-author-book-card:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.quote-author-book-card h3 {
+  margin: 0;
+  color: var(--accent-color);
+  font-size: 1rem;
+}
+
+.quote-author-book-card p {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+  color: var(--secondary-text);
+}
+
+.quote-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.tag {
   background-color: var(--accent-color);
   color: #ffffff;
-}
-
-#viewEditBtn:hover {
-  background-color: #d4ac0d;
-}
-
-#viewDeleteBtn {
-  background-color: var(--danger-color);
-  color: #ffffff;
-}
-
-#viewDeleteBtn:hover {
-  background-color: var(--danger-hover);
-}
-
-/* Custom Scrollbar */
-.view-content::-webkit-scrollbar {
-  width: 8px;
-}
-
-.view-content::-webkit-scrollbar-thumb {
-  background-color: var(--secondary-text);
-  border-radius: 4px;
-}
-
-.view-content::-webkit-scrollbar-thumb:hover {
-  background-color: var(--primary-color);
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.75rem;
 }
 
 /****************************************************************
- * Responsive Adjustments
+ * Responsive
  ****************************************************************/
 @media (max-width: 600px) {
   #sidePanel {
@@ -695,7 +705,7 @@ main {
   }
 
   main {
-    margin-left: 0; /* Let the sidePanel overlap if not collapsed */
+    margin-left: 30px;
   }
 
   .quotes-header {
@@ -709,22 +719,17 @@ main {
     max-width: 100%;
   }
 
-  .form-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .form-footer button {
-    width: 100%;
-  }
-
-  .quotes-grid .grid,
   .cards-container.grid {
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   }
 
-  #openSidebarBtn {
-    left: 10px;
+  /* Remove the left:10px so flap is at left:0 for all screens */
+  .side-flap {
+    left: 0 !important;
+    transform: translate(-100%, -50%);
+  }
+
+  .view-content {
+    flex-direction: column;
   }
 }

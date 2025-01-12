@@ -12,81 +12,113 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <!-- Header Bar (Visible on All Pages Except Main Menu) -->
-  <header id="topNav" class="hidden">
-    <nav class="navbar">
-      <div class="nav-left">
-        <button id="homeBtn" class="nav-button" title="Home">
-          <span class="material-icons">home</span>
-        </button>
-        <button id="quotesNavBtn" class="nav-button" title="Quotes">
-          <span class="material-icons">format_quote</span> Quotes
-        </button>
-        <button id="authorsNavBtn" class="nav-button" title="Authors">
-          <span class="material-icons">person</span> Authors
-        </button>
-        <button id="booksNavBtn" class="nav-button" title="Books">
-          <span class="material-icons">book</span> Books
-        </button>
-      </div>
-      <div class="nav-right">
-        <!-- Search Button -->
-        <button id="searchBtn" class="nav-button" title="Search">
-          <span class="material-icons">search</span>
-        </button>
-        <button id="exportBtn" class="nav-button" title="Export Quotes">
-          <span class="material-icons">file_download</span>
-        </button>
-        <button id="importBtn" class="nav-button" title="Import Quotes">
-          <span class="material-icons">file_upload</span>
-        </button>
-        <!-- Hidden File Input for Import -->
-        <input type="file" id="importFileInput" accept=".csv" class="hidden" />
-      </div>
-    </nav>
-  </header>
+  <!-- Side Panel -->
+  <div id="sidePanel">
+    <button id="homeSideBtn" class="side-button">
+      <span class="material-icons">home</span> Home
+    </button>
 
-  <main>
-    <!-- Main Menu -->
-    <div id="mainMenu">
-      <h1>Welcome to My Quotes</h1>
-      <p>A curated place for your favorite quotes.</p>
-      <div class="menu">
-        <button class="menu-button" id="quotesMenu">
-          <span class="material-icons">format_quote</span> Quotes
-        </button>
-        <button class="menu-button" id="authorsMenu">
-          <span class="material-icons">person</span> Authors
-        </button>
-        <button class="menu-button" id="booksMenu">
-          <span class="material-icons">book</span> Books
-        </button>
-      </div>
+    <!-- Top 5 Books -->
+    <div class="side-section">
+      <h3>Top 5 Books</h3>
+      <ul id="top5BooksList" class="side-list"></ul>
+      <button id="showAllBooks" class="side-button">
+        <span class="material-icons">book</span> Show All
+      </button>
     </div>
 
-    <!-- Quotes Page -->
-    <div id="quotesPage" class="hidden">
+    <!-- Top 5 Authors -->
+    <div class="side-section">
+      <h3>Top 5 Authors</h3>
+      <ul id="top5AuthorsList" class="side-list"></ul>
+      <button id="showAllAuthors" class="side-button">
+        <span class="material-icons">person</span> Show All
+      </button>
+    </div>
+
+    <!-- Import / Export -->
+    <div class="side-section import-export-section">
+      <button id="exportBtn" class="side-button">
+        <span class="material-icons">file_download</span> Export
+      </button>
+      <button id="importBtn" class="side-button">
+        <span class="material-icons">file_upload</span> Import
+      </button>
+      <!-- Hidden File Input for Import -->
+      <input type="file" id="importFileInput" accept=".csv" class="hidden" />
+    </div>
+  </div>
+
+  <!-- Sidebar Toggle Button -->
+  <button id="sidebarToggle" title="Toggle Sidebar">
+    <span class="material-icons">menu</span>
+  </button>
+
+  <main>
+    <!-- Quotes Page (Default) -->
+    <div id="quotesPage">
       <div class="quotes-header">
-        <h2>Quotes</h2>
+        <!-- Integrated Search Field with Clear Button -->
+        <div class="search-container">
+          <input
+            type="text"
+            id="quotesSearchInput"
+            placeholder="Search quotes, authors, or books..."
+          />
+          <button id="clearSearchBtn" class="clear-button" title="Clear Search">
+            <span class="material-icons">close</span>
+          </button>
+        </div>
+
+        <!-- Add Quote Button -->
         <button id="addQuoteToggle" title="Add Quote">
           <span class="material-icons">add</span>
         </button>
       </div>
-      <div class="quotes-grid">
-        <div class="grid"></div>
+
+      <!-- Spacing between search field and grid -->
+      <div class="spacing"></div>
+
+      <!-- Search Results Grid (Rendered Dynamically) -->
+      <div id="searchResultsGrid" class="cards-container search-results-grid hidden">
+        <section id="searchAuthorsSection" class="search-section hidden">
+          <h3>Authors</h3>
+          <div id="searchAuthorsGrid" class="cards-container grid"></div>
+        </section>
+
+        <section id="searchBooksSection" class="search-section hidden">
+          <h3>Books</h3>
+          <div id="searchBooksGrid" class="cards-container grid"></div>
+        </section>
+
+        <section id="searchQuotesSection" class="search-section hidden">
+          <h3>Quotes</h3>
+          <div id="searchQuotesGrid" class="cards-container grid"></div>
+        </section>
+      </div>
+
+      <!-- Default Quotes Grid (Shown when no search) -->
+      <div class="cards-container quotes-grid">
+        <div id="defaultQuotesGrid" class="cards-container grid"></div>
       </div>
     </div>
 
     <!-- Authors Page -->
     <div id="authorsPage" class="hidden">
+      <button id="backFromAuthors" class="back-button">
+        <span class="material-icons">arrow_back</span> Back to Quotes
+      </button>
       <h2>Authors</h2>
-      <div id="authorsList" class="authors-list"></div>
+      <div id="authorsList" class="cards-container grid"></div>
     </div>
 
     <!-- Books Page -->
     <div id="booksPage" class="hidden">
+      <button id="backFromBooks" class="back-button">
+        <span class="material-icons">arrow_back</span> Back to Quotes
+      </button>
       <h2>Books</h2>
-      <div id="booksList" class="books-list"></div>
+      <div id="booksList" class="cards-container grid"></div>
     </div>
 
     <!-- Author Detail Page -->
@@ -94,14 +126,12 @@
       <button id="backFromAuthorDetail" class="back-button">
         <span class="material-icons">arrow_back</span> Back to Authors
       </button>
-      <div class="author-detail-content">
+      <div class="detail-content">
         <h2 id="authorNameDetail"></h2>
         <h3>Books:</h3>
-        <div id="authorBooksList" class="books-list"></div>
+        <div id="authorBooksList" class="cards-container grid"></div>
         <h3>Quotes:</h3>
-        <div class="quotes-grid" id="authorQuotesGrid">
-          <div class="grid"></div>
-        </div>
+        <div class="cards-container grid" id="authorQuotesGrid"></div>
       </div>
     </div>
 
@@ -110,36 +140,11 @@
       <button id="backFromBookDetail" class="back-button">
         <span class="material-icons">arrow_back</span> Back to Books
       </button>
-      <div class="book-detail-content">
+      <div class="detail-content">
         <h2 id="bookTitleDetail"></h2>
         <h4 id="bookAuthorDetail"></h4>
         <h3>Quotes:</h3>
-        <div class="quotes-grid" id="bookQuotesGrid">
-          <div class="grid"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Search Page -->
-    <div id="searchPage" class="hidden">
-      <div class="search-header">
-        <input type="text" id="searchInput" placeholder="Search quotes, authors, or books..." />
-      </div>
-      <div id="searchResults" class="search-results">
-        <div id="searchAuthors" class="search-section hidden">
-          <h3>Authors</h3>
-          <div class="authors-list"></div>
-        </div>
-        <div id="searchBooks" class="search-section hidden">
-          <h3>Books</h3>
-          <div class="books-list"></div>
-        </div>
-        <div id="searchQuotes" class="search-section hidden">
-          <h3>Quotes</h3>
-          <div class="quotes-grid">
-            <div class="grid"></div>
-          </div>
-        </div>
+        <div class="cards-container grid" id="bookQuotesGrid"></div>
       </div>
     </div>
 
@@ -148,8 +153,6 @@
 
     <!-- Modal for Add/Edit Quote -->
     <div id="addQuoteMenu" class="modal hidden" data-backdrop="static">
-      <!-- Removed the close (X) button per instructions -->
-
       <form id="quoteForm">
         <label for="quoteText">Quote:</label>
         <textarea id="quoteText" rows="5" required></textarea>

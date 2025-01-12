@@ -11,154 +11,221 @@
   --danger-hover: #a93226;
   --box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
   --modal-overlay-bg: rgba(0, 0, 0, 0.5);
+  --clear-button-bg: transparent;
+  --clear-button-color: var(--secondary-text);
+  
+  /* Distinct Card Colors */
+  --quote-card-bg: #ffffff;
+  --author-card-bg: #e8f6f3;
+  --book-card-bg: #f9ebea;
 }
 
 /* Body */
 body {
+  display: flex; /* Enable Flexbox */
+  min-height: 100vh; /* Ensure the body takes at least the full viewport height */
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
   margin: 0;
   padding: 0;
-  overflow: overlay;
-}
-
-/* Hidden Class */
-.hidden {
-  display: none !important;
+  overflow-x: hidden; /* Prevent horizontal overflow */
 }
 
 html {
   overflow-y: scroll; /* Always show vertical scrollbar */
 }
 
+.hidden {
+  display: none !important;
+}
+
 /****************************************************************
- * Header Bar
+ * Side Panel
  ****************************************************************/
-.navbar {
-  display: flex;
-  align-items: center;
+#sidePanel {
+  width: 250px;
   background-color: var(--primary-color);
-  padding: 10px 20px;
-  justify-content: space-between;
+  color: #ffffff;
+  padding: 15px;
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: fixed; /* Keep it fixed to the viewport */
+  top: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 1000; /* Ensure it stays above other elements */
+  transition: transform 0.3s ease;
 }
 
-.nav-left,
-.nav-right {
+#sidePanel.collapsed {
+  transform: translateX(-250px);
+}
+
+#sidebarToggle {
+  position: fixed;
+  top: 20px;
+  left: 250px; /* Aligns with sidebar width */
+  z-index: 1001;
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
   display: flex;
   align-items: center;
+  justify-content: center;
+  transition: left 0.3s ease;
+  box-shadow: var(--box-shadow);
 }
 
-.nav-left .nav-button,
-.nav-right .nav-button {
-  margin: 0 10px;
-  font-size: 24px;
-  padding: 8px 14px;
+#sidebarToggle:hover {
+  background-color: var(--button-hover);
+}
+
+#sidebarToggle.collapsed {
+  left: 60px;
+}
+
+/* Side Buttons */
+.side-button {
   border: none;
   border-radius: 5px;
-  background-color: transparent;
-  color: #ffffff;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  display: flex;
-  align-items: center;
-}
-
-.nav-left .nav-button:hover,
-.nav-right .nav-button:hover {
   background-color: var(--button-bg);
-}
-
-.nav-button .material-icons {
-  font-size: 24px;
-  margin-right: 5px;
-}
-
-.nav-right .nav-button .material-icons {
-  margin-right: 0;
-}
-
-/****************************************************************
- * Pages & Layout
- ****************************************************************/
-#mainMenu,
-#quotesPage,
-#authorsPage,
-#booksPage,
-#authorDetailPage,
-#bookDetailPage,
-#searchPage {
-  padding: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  position: relative;
-}
-
-/* Home Page Look */
-#mainMenu h1 {
-  text-align: center;
-  color: var(--primary-color);
-  margin-bottom: 10px;
-  font-size: 2.5rem;
-}
-
-#mainMenu p {
-  text-align: center;
-  color: var(--secondary-text);
-  margin-bottom: 30px;
-  font-size: 1.3rem;
-}
-
-/****************************************************************
- * Main Menu Buttons
- ****************************************************************/
-.menu {
-  display: flex;
-  justify-content: center;
-  gap: 25px;
-}
-
-.menu-button {
-  padding: 15px 30px;
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--primary-color);
-  background-color: #ffffff;
-  border: 2px solid var(--primary-color);
-  border-radius: 5px;
+  color: #ffffff;
+  font-size: 16px;
+  padding: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
   display: flex;
   align-items: center;
+  gap: 5px;
+  transition: background-color 0.3s ease;
 }
 
-.menu-button:hover {
-  background-color: var(--primary-color);
-  color: #ffffff;
+.side-button:hover {
+  background-color: var(--button-hover);
 }
 
-.menu-button .material-icons {
-  font-size: 24px;
-  margin-right: 8px;
+.side-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.side-section h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.side-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.side-list li {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
+.side-list li:hover {
+  background-color: #3b5568;
+}
+
+.import-export-section {
+  margin-top: auto; /* Push to bottom */
 }
 
 /****************************************************************
- * Quotes Title & Add Button
+ * Main Content
  ****************************************************************/
+/* Make main content fit next to the sidebar without overlapping */
+main {
+  margin-left: 280px; /* Space for the fixed sidebar + some padding */
+  padding: 20px;
+  box-sizing: border-box;
+  flex: 1; /* Allow main to grow and fill available space */
+  background-color: var(--background-color);
+  overflow-y: auto; /* Enable vertical scrolling within main */
+  transition: margin-left 0.3s ease;
+}
+
+/* Adjust main margin when sidebar is collapsed */
+#sidePanel.collapsed + #sidebarToggle + main {
+  margin-left: 60px; /* Adjust according to sidebarToggle position */
+}
+
+/****************************************************************
+ * Quotes Page Layout
+ ****************************************************************/
+/* Quotes Header */
 .quotes-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  gap: 20px;
+  flex-wrap: wrap; /* Allow wrapping on smaller screens */
 }
 
-.quotes-header h2 {
-  margin: 0;
-  font-size: 2rem;
-  color: var(--primary-color);
+/* Search Container */
+.search-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  flex: 1;
 }
 
-.quotes-header #addQuoteToggle {
+/* Spacing between search field and grid */
+.spacing {
+  height: 20px;
+}
+
+/* Search Input */
+#quotesSearchInput {
+  width: 100%;
+  padding: 10px 40px 10px 10px; /* Increased right padding for clear button */
+  font-size: 1rem;
+  border: 1px solid var(--secondary-text);
+  border-radius: 5px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box; /* Ensure padding is included in total width */
+}
+
+
+#quotesSearchInput:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+/* Clear Button */
+.clear-button {
+  position: absolute;
+  right: 10px; /* Align with the edge of the input field */
+  top: 50%; /* Vertically center */
+  transform: translateY(-50%);
+  background: var(--clear-button-bg);
+  border: none;
+  cursor: pointer;
+  color: var(--clear-button-color);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1; /* Ensure button stays above the input */
+  height: 20px; /* Adjust as needed */
+  width: 20px; /* Adjust as needed */
+  padding: 0;
+}
+
+
+/* Add Quote Button */
+#addQuoteToggle {
   font-size: 28px;
   width: 50px;
   height: 50px;
@@ -174,61 +241,158 @@ html {
   justify-content: center;
 }
 
-.quotes-header #addQuoteToggle:hover {
+#addQuoteToggle:hover {
   background-color: var(--button-hover);
 }
 
 /****************************************************************
- * Quotes Grid
+ * Search Sections in Quotes Page
  ****************************************************************/
-.quotes-grid {
-  text-align: center;
+.search-section {
+  margin-bottom: 30px;
 }
 
-.quotes-grid .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 25px;
+.search-section h3 {
+  margin: 0; /* Remove top and bottom margins */
+  margin-bottom: 10px; /* Add a smaller bottom margin for spacing */
+  color: var(--primary-color);
+  font-size: 1.5rem;
 }
 
 /****************************************************************
- * Quote Card
+ * Cards Container
  ****************************************************************/
-.quote-card {
-  background-color: #ffffff;
+.cards-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.cards-container.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 25px; /* Equal vertical and horizontal gaps */
+  align-items: stretch; /* Ensures all items stretch to fill the grid row */
+}
+
+.search-results-grid {
+  margin-top: 20px; /* Consistent spacing */
+}
+
+/****************************************************************
+ * Card Styles
+ ****************************************************************/
+.card {
+  background-color: var(--quote-card-bg);
   border: 1px solid var(--secondary-text);
   border-radius: 5px;
   padding: 20px;
   box-shadow: var(--box-shadow);
-  position: relative;
+  position: relative; /* Important for absolute positioning of .actions */
   transition: background-color 0.3s ease;
   cursor: pointer;
-  text-align: left;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  height: 170px;
+  justify-content: space-between; /* Distributes space between elements */
   overflow: hidden;
+  height: 100%; /* Ensures all cards are the same height */
+  box-sizing: border-box;
 }
 
-.quote-card:hover {
+.card:hover {
   background-color: #f0f0f0;
 }
 
-.quote-card .actions {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  display: none;
-  gap: 10px;
+/* Specific Styles for Quote Cards */
+.quote-card {
+  background-color: var(--quote-card-bg);
 }
 
-.quote-card:hover .actions {
+.quote-card .quote-text {
+  font-size: 1rem;
+  color: var(--secondary-text);
+  margin: 0; /* Removed extra top margin */
+  margin-bottom: 10px;
+  text-align: justify;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 4; /* Limit to 4 lines */
+  -webkit-box-orient: vertical;
+}
+
+.quote-card .card-footer {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
-/* Edit & Delete Buttons */
-.quote-card .actions button {
+.quote-card .quote-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.quote-card .quote-book,
+.quote-card .quote-author {
+  font-weight: bold;
+  color: var(--primary-color);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.quote-card .quote-book {
+  margin-bottom: 5px;
+  font-size: 1.1rem;
+}
+
+.quote-card .quote-author {
+  font-size: 1rem;
+}
+
+/* Specific Styles for Author and Book Cards */
+.author-card {
+  background-color: var(--author-card-bg);
+}
+
+.author-card h3,
+.book-card h3 {
+  margin: 0;
+  color: var(--primary-color);
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.author-card p,
+.book-card p {
+  margin: 3px 0;
+  line-height: 1.3;
+  color: var(--secondary-text);
+  font-size: 0.85rem;
+}
+
+.book-card {
+  background-color: var(--book-card-bg);
+}
+
+/* Actions (Edit & Delete) */
+.actions {
+  position: absolute;
+  bottom: 10px;  /* Position 10px from the bottom */
+  right: 10px;   /* Position 10px from the right */
+  display: flex; /* Use flex to align buttons horizontally */
+  gap: 10px;     /* Space between buttons */
+  z-index: 10;   /* Ensure buttons are on top of other content */
+  opacity: 0;    /* Fully transparent by default */
+  visibility: hidden; /* Hidden from accessibility tree by default */
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.card:hover .actions {
+  opacity: 1; /* Fully visible */
+  visibility: visible; /* Make accessible */
+}
+
+.actions button {
   width: 35px;
   height: 35px;
   border: none;
@@ -242,71 +406,66 @@ html {
   transition: background-color 0.3s ease;
 }
 
+/* Style for Edit Button */
 .edit-btn {
   background-color: var(--accent-color);
-}
-
-.edit-btn .material-icons {
-  font-size: 20px;
+  color: #ffffff;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
 }
 
 .edit-btn:hover {
   background-color: #d4ac0d;
 }
 
+/* Style for Delete Button */
 .delete-btn {
   background-color: var(--danger-color);
-}
-
-.delete-btn .material-icons {
-  font-size: 20px;
+  color: #ffffff;
+  width: 35px;
+  height: 35px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.3s ease;
 }
 
 .delete-btn:hover {
   background-color: var(--danger-hover);
 }
 
-/* Quote Text */
-.quote-text {
-  font-size: 0.9rem;
-  color: var(--secondary-text);
-  margin-bottom: auto;
-  text-align: justify;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-}
-
-/* Book Title */
-.quote-book {
-  font-weight: bold;
-  color: var(--primary-color);
-  margin: 10px 0 5px;
-  font-size: 1.1rem;
-  text-align: left;
+/****************************************************************
+ * Back Button
+ ****************************************************************/
+.back-button {
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  padding: 10px 15px;
   cursor: pointer;
-  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  margin-bottom: 20px;
+  transition: background-color 0.3s ease;
 }
 
-.quote-book:hover {
-  text-decoration: underline;
+.back-button:hover {
+  background-color: var(--button-hover);
 }
 
-/* Author Name */
-.quote-author {
-  font-weight: bold;
-  color: var(--primary-color);
-  font-size: 1rem;
-  margin: 0;
-  text-align: left;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.quote-author:hover {
-  text-decoration: underline;
+.back-button .material-icons {
+  margin-right: 5px;
 }
 
 /****************************************************************
@@ -325,7 +484,7 @@ html {
 /****************************************************************
  * Modal
  ****************************************************************/
- .modal {
+.modal {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -370,9 +529,9 @@ html {
   resize: none;
   height: 120px;
   text-align: left;
+  margin: 0; /* Remove default margin */
 }
 
-/* Remove blue focus styles */
 #quoteForm textarea:focus,
 #quoteForm input:focus {
   outline: none;
@@ -380,7 +539,6 @@ html {
   box-shadow: none;
 }
 
-/* Form Footer for Save & Discard Buttons */
 .form-footer {
   display: flex;
   justify-content: flex-end;
@@ -420,19 +578,12 @@ html {
   background-color: #95a5a6;
 }
 
-
 /****************************************************************
  * Confirm Deletion Modal
  ****************************************************************/
 #confirmDeleteModal {
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: var(--box-shadow);
-  width: 90%;
-  max-width: 400px;
-  padding: 25px;
   text-align: center;
-  z-index: 1000;
+  max-width: 400px;
 }
 
 #confirmDeleteModal h3 {
@@ -448,20 +599,6 @@ html {
 }
 
 #confirmDeleteModal .form-footer {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-#confirmDeleteModal .form-footer button {
-  width: 120px;
-  border: none;
-  border-radius: 5px;
-  padding: 12px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
   justify-content: center;
 }
 
@@ -492,14 +629,7 @@ html {
  * View Quote Modal
  ****************************************************************/
 #viewQuoteModal {
-  background-color: #ffffff; /* Neutral white background */
-  border-radius: 10px;
-  box-shadow: var(--box-shadow); /* Use your existing shadow variable */
-  width: 90%;
   max-width: 600px;
-  padding: 25px;
-  text-align: left;
-  z-index: 1000;
 }
 
 .view-content {
@@ -515,45 +645,19 @@ html {
   text-align: justify;
 }
 
-/* View Quote Modal: Title (Book) */
-.view-content .quote-book a {
-  font-size: 1.2rem; /* Slightly larger for the title */
-  font-weight: bold;
-  color: var(--primary-color);
-  text-decoration: none;
-  margin: 0; /* Reduced bottom margin for less spacing */
-  display: inline;
-  cursor: pointer;
-}
-
-.view-content .quote-book a:hover {
-  text-decoration: underline; /* Underline on hover */
-  color: var(--primary-color); /* No color change on hover */
-}
-
-/* View Quote Modal: Author */
+.view-content .quote-book a,
 .view-content .quote-author a {
-  font-size: 1rem;
+  text-decoration: none;
   font-weight: bold;
   color: var(--primary-color);
-  text-decoration: none;
-  margin: 2px 0 0 0; /* No extra spacing above or below */
-  display: inline;
-  cursor: pointer;
-}
-
-.view-content .quote-author a:hover {
-  text-decoration: underline; /* Underline on hover */
-  color: var(--primary-color); /* No color change on hover */
 }
 
 .view-content .quote-book a:hover,
 .view-content .quote-author a:hover {
-  text-decoration: underline; /* Underline on hover */
-  color: var(--primary-color); /* Keep color consistent */
+  text-decoration: underline;
+  color: var(--primary-color);
 }
 
-/* Modal footer buttons */
 #viewQuoteModal .form-footer {
   display: flex;
   justify-content: center;
@@ -561,42 +665,22 @@ html {
   margin-top: 20px;
 }
 
-#viewQuoteModal .form-footer button {
-  width: 120px;
-  border: none;
-  border-radius: 5px;
-  padding: 12px;
-  cursor: pointer;
-  font-size: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Edit button styles */
 #viewEditBtn {
   background-color: var(--accent-color);
   color: #ffffff;
 }
 
 #viewEditBtn:hover {
-  background-color: #d4ac0d; /* Adjusted hover color for better contrast */
+  background-color: #d4ac0d;
 }
 
-/* Delete button styles */
 #viewDeleteBtn {
   background-color: var(--danger-color);
   color: #ffffff;
 }
 
 #viewDeleteBtn:hover {
-  background-color: var(--danger-hover); /* Define this variable if not already */
-}
-
-/* Button icons */
-#viewEditBtn .material-icons,
-#viewDeleteBtn .material-icons {
-  margin-right: 5px;
+  background-color: var(--danger-hover);
 }
 
 /* Scrollbar customization for content */
@@ -613,169 +697,37 @@ html {
   background-color: var(--primary-color);
 }
 
-/* Remove focus blue outline from buttons and links */
-#viewQuoteModal button:focus,
-#viewQuoteModal a:focus {
-  outline: none; /* Remove default browser outline */
-  box-shadow: none; /* Remove focus shadow */
-}
-
-/* Add hover state feedback for links */
-#viewQuoteModal a:hover {
-  text-decoration: underline; /* Ensure consistent hover behavior */
-}
-
-
-/****************************************************************
- * Authors & Books
- ****************************************************************/
-.authors-list,
-.books-list,
-.authorBooksList {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 15px;
-}
-
-/* For search results, ensure the same structure is used. */
-.author-card,
-.book-card {
-  background-color: #ffffff;
-  border: 1px solid var(--secondary-text);
-  border-radius: 5px;
-  padding: 15px;
-  box-shadow: var(--box-shadow);
-  text-align: left;
-  font-size: 0.9rem; /* Ensure consistent font size */
-}
-
-.author-card h3,
-.book-card h3 {
-  margin: 0;
-  color: var(--primary-color);
-  font-size: 1rem;
-  margin-bottom: 5px;
-}
-
-.author-card p,
-.book-card p {
-  margin: 3px 0;
-  line-height: 1.3;
-  color: var(--secondary-text);
-  font-size: 0.85rem;
-}
-
-.author-card:hover,
-.book-card:hover {
-  background-color: #f0f0f0;
-  cursor: pointer;
-}
-
-/****************************************************************
- * Back Button
- ****************************************************************/
-.back-button {
-  background-color: var(--primary-color);
-  color: #ffffff;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 15px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  margin-bottom: 20px;
-  transition: background-color 0.3s ease;
-}
-
-.back-button:hover {
-  background-color: var(--button-hover);
-}
-
-.back-button .material-icons {
-  margin-right: 5px;
-}
-
-/****************************************************************
- * Search Page
- ****************************************************************/
-#searchPage {
-  padding: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
-  position: relative;
-}
-
-.search-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 20px;
-}
-
-#searchInput {
-  width: 100%;
-  max-width: 600px;
-  padding: 12px 20px;
-  font-size: 1rem;
-  border: 1px solid var(--secondary-text);
-  border-radius: 5px;
-  transition: border-color 0.3s ease;
-}
-
-#searchInput:focus {
-  outline: none;
-  border-color: var(--accent-color);
-}
-
-.search-section {
-  margin-bottom: 30px;
-}
-
-.search-section > h3 { /* Make sure only direct children h3 are styled */
-  color: var(--primary-color);
-  margin-bottom: 15px;
-  font-size: 1.5rem;
-}
-
-/* Hide search-section if no results */
-.search-section.hidden {
-  display: none;
-}
-
-.search-section .authors-list,
-.search-section .books-list,
-.search-section .quotes-grid .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 25px;
-}
-
-.search-section .quotes-grid {
-  text-align: center;
-}
-
-.search-section .quotes-grid .grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 25px;
-}
-
 /****************************************************************
  * Responsive Adjustments
  ****************************************************************/
 @media (max-width: 600px) {
-  .navbar {
+  #sidePanel {
+    width: 200px;
+  }
+
+  #sidebarToggle {
+    left: 200px;
+  }
+
+  #sidePanel.collapsed + #sidebarToggle + main {
+    margin-left: 60px; /* Adjust according to collapsed sidebar */
+  }
+
+  main {
+    margin-left: 60px; /* Adjusted for collapsed sidebar */
+    padding: 10px;
+    width: calc(100% - 60px); /* Adjust width for smaller screens */
+  }
+
+  .quotes-header {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+    gap: 10px;
   }
 
-  .nav-left,
-  .nav-right {
-    justify-content: flex-start;
-  }
-
-  .nav-right .nav-button {
-    margin: 5px 5px 0 0;
+  .search-container {
+    width: 100%;
+    max-width: 100%;
   }
 
   .form-footer {
@@ -787,20 +739,10 @@ html {
     width: 100%;
   }
 
-  #confirmDeleteModal .form-footer,
-  #viewQuoteModal .form-footer,
-  #searchPage .form-footer {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  #confirmDeleteModal .form-footer button,
-  #viewQuoteModal .form-footer button,
-  #searchPage .form-footer button {
-    width: 100%;
-  }
-
-  #searchInput {
-    max-width: 100%;
+  /* Adjust card grid for smaller screens */
+  .quotes-grid .grid,
+  .cards-container.grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px; /* Reduced gap for smaller screens */
   }
 }

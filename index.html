@@ -8,7 +8,7 @@
   <!-- Google Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <!-- Link to your CSS -->
+  <!-- Link to CSS -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -44,7 +44,6 @@
       <button id="importBtn" class="side-button">
         <span class="material-icons">file_upload</span> Import
       </button>
-      <!-- Hidden File Input for Import -->
       <input type="file" id="importFileInput" accept=".csv" class="hidden" />
     </div>
   </div>
@@ -76,10 +75,9 @@
         </button>
       </div>
 
-      <!-- Spacing between search field and grid -->
       <div class="spacing"></div>
 
-      <!-- Search Results Grid (Rendered Dynamically) -->
+      <!-- Search Results Grid -->
       <div id="searchResultsGrid" class="cards-container search-results-grid hidden">
         <section id="searchAuthorsSection" class="search-section hidden">
           <h3>Authors</h3>
@@ -97,7 +95,7 @@
         </section>
       </div>
 
-      <!-- Default Quotes Grid (Shown when no search) -->
+      <!-- Default Quotes Grid -->
       <div class="cards-container quotes-grid">
         <div id="defaultQuotesGrid" class="cards-container grid"></div>
       </div>
@@ -148,7 +146,7 @@
       </div>
     </div>
 
-    <!-- Modal Overlay (used for dark background) -->
+    <!-- Modal Overlay -->
     <div id="modalOverlay" class="modal-overlay hidden"></div>
 
     <!-- Modal for Add/Edit Quote -->
@@ -184,7 +182,7 @@
       </div>
     </div>
 
-    <!-- Modal for Viewing a Quote -->
+    <!-- View Quote Modal -->
     <div id="viewQuoteModal" class="modal hidden">
       <div class="view-content">
         <p id="viewQuoteText"></p>
@@ -204,7 +202,7 @@
     </div>
   </main>
 
-  <!-- Link to your JS -->
+  <!-- Link to JS -->
   <script src="script.js"></script>
 </body>
 </html>

@@ -103,7 +103,6 @@ const quotesPage = document.getElementById("quotesPage");
 const quotesSearchInput = document.getElementById("quotesSearchInput");
 const clearSearchBtn = document.getElementById("clearSearchBtn");
 const addQuoteToggle = document.getElementById("addQuoteToggle");
-// IMPORTANT: We must have <div id="defaultQuotesGrid"> in HTML
 const defaultQuotesGrid = document.getElementById("defaultQuotesGrid");
 
 // Search Results Grid
@@ -263,7 +262,6 @@ function showQuotesPage() {
   bookDetailPage.classList.add("hidden");
   hideOverlay();
 
-  // Refresh display based on current search input
   handleSearchInput();
 }
 
@@ -323,7 +321,6 @@ function openViewQuoteModal(id) {
   viewQuoteModal.classList.remove("hidden");
   showOverlay();
 
-  // Detach old listeners by cloning
   const viewBookLink = document.getElementById("viewBookLink");
   const viewAuthorLink = document.getElementById("viewAuthorLink");
   const newViewBookLink = viewBookLink.cloneNode(true);
@@ -471,22 +468,19 @@ async function loadQuotesFromDB() {
 function handleSearchInput() {
   const query = quotesSearchInput.value.trim().toLowerCase();
 
-  // Clear previous search results
+  // Clear old results
   searchQuotesGrid.innerHTML = "";
   searchBooksGrid.innerHTML = "";
   searchAuthorsGrid.innerHTML = "";
 
-  // Toggle between default vs. search
   if (query) {
     searchResultsGrid.classList.remove("hidden");
-    // Hide the default quotes grid container
     defaultQuotesGrid.parentElement.classList.add("hidden");
   } else {
     searchResultsGrid.classList.add("hidden");
     defaultQuotesGrid.parentElement.classList.remove("hidden");
   }
 
-  // If there's no search text, show all quotes
   if (!query) {
     if (quotes.length === 0) {
       defaultQuotesGrid.innerHTML = "<p>No quotes added yet.</p>";
@@ -500,7 +494,6 @@ function handleSearchInput() {
     return;
   }
 
-  // Filter for search text
   const matchedQuotes = quotes.filter((q) =>
     q.quoteText.toLowerCase().includes(query)
   );
@@ -670,7 +663,6 @@ function openAuthorDetailPage(authorName) {
   );
   authorNameDetail.textContent = authorName;
 
-  // Books by this author
   const booksSet = new Set(authorQuotes.map((q) => q.bookTitle));
   if (booksSet.size > 0) {
     authorBooksList.innerHTML = "";
@@ -688,7 +680,6 @@ function openAuthorDetailPage(authorName) {
     authorBooksList.innerHTML = "<p>No books available for this author.</p>";
   }
 
-  // Quotes by this author
   if (authorQuotes.length > 0) {
     authorQuotesGrid.innerHTML = "";
     authorQuotes.forEach((quote) => {
@@ -722,7 +713,6 @@ function openBookDetailPage(bookTitle) {
     return;
   }
 
-  // If there's at least one quote from this book
   const book = bookQuotes[0];
   bookTitleDetail.textContent = book.bookTitle;
   bookAuthorDetail.textContent = `By ${book.authorName}`;
@@ -785,7 +775,7 @@ function importQuotes(event) {
     const authorNameIndex = headers.indexOf("author name");
 
     if (quoteIndex === -1 || bookTitleIndex === -1 || authorNameIndex === -1) {
-      alert("Invalid CSV format. Please ensure the headers are: Quote, Book Title, Author Name.");
+      alert("Invalid CSV format. Expected: Quote, Book Title, Author Name.");
       return;
     }
 
@@ -827,7 +817,7 @@ function importQuotes(event) {
     }
 
     if (newQuotes.length === 0) {
-      alert("No new quotes to import or all quotes are duplicates.");
+      alert("No new quotes or all duplicates.");
       return;
     }
 
@@ -865,7 +855,7 @@ function parseCSVLine(line) {
   for (let i = 0; i < line.length; i++) {
     const char = line[i];
     if (char === '"') {
-      // If we see a doubled quote, skip it and add one literal quote
+      // If we see a doubled quote
       if (inQuotes && line[i + 1] === '"') {
         current += '"';
         i++;
@@ -934,9 +924,9 @@ function updateSidePanel() {
     const sortedAuthors = Object.values(authorCountMap).sort(
       (a, b) => b.count - a.count
     );
-    const top5 = sortedAuthors.slice(0, 5);
+    const top5Authors = sortedAuthors.slice(0, 5);
 
-    top5.forEach((authorObj) => {
+    top5Authors.forEach((authorObj) => {
       const li = document.createElement("li");
       li.textContent = `${authorObj.name} (${authorObj.count})`;
       li.classList.add("side-list-item");
@@ -958,7 +948,6 @@ function toggleSidebar() {
   sidePanel.classList.toggle("collapsed");
   toggleBtn.classList.toggle("collapsed");
 
-  // Adjust main margin
   if (sidePanel.classList.contains("collapsed")) {
     document.querySelector("main").style.marginLeft = "60px";
   } else {
@@ -969,12 +958,31 @@ function toggleSidebar() {
 /********************************************************
  * Utility Functions
  ********************************************************/
-/**
- * Create a card based on the item type (quote, author, book)
- */
 function createCard(item, type) {
   const card = document.createElement("div");
   card.classList.add("card");
+
+  // 3D hover tilt
+  card.addEventListener("mousemove", (e) => {
+    const rect = card.getBoundingClientRect();
+    const cardWidth = rect.width;
+    const cardHeight = rect.height;
+    const centerX = rect.left + cardWidth / 2;
+    const centerY = rect.top + cardHeight / 2;
+
+    const offsetX = e.clientX - centerX;
+    const offsetY = e.clientY - centerY;
+
+    const rotateMax = 1; // in degrees
+    const rotateX = (offsetY / (cardHeight / 2)) * rotateMax;
+    const rotateY = -(offsetX / (cardWidth / 2)) * rotateMax;
+
+    card.style.transform = `translateZ(3px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+  });
+
+  card.addEventListener("mouseleave", () => {
+    card.style.transform = "translateZ(0) rotateX(0) rotateY(0)";
+  });
 
   if (type === "quote") {
     card.classList.add("quote-card");
@@ -996,27 +1004,23 @@ function createCard(item, type) {
       </div>
     `;
 
-    // Whole card => view quote
     card.addEventListener("click", (e) => {
       if (e.target.closest("button")) return;
       openViewQuoteModal(item.id);
     });
 
-    // Edit
     const editBtn = card.querySelector(".edit-btn");
     editBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       editQuote(e);
     });
 
-    // Delete
     const deleteBtn = card.querySelector(".delete-btn");
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       removeQuote(e);
     });
 
-    // Book / Author clicks
     const bookEl = card.querySelector(".quote-book");
     bookEl.addEventListener("click", (e) => {
       e.preventDefault();
@@ -1055,9 +1059,6 @@ function createCard(item, type) {
   return card;
 }
 
-/********************************************************
- * Edit / Remove Quote
- ********************************************************/
 function editQuote(e) {
   const quoteId = e.target.closest("button").getAttribute("data-id");
   const quoteToEdit = quotes.find((q) => q.id === quoteId);

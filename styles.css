@@ -13,7 +13,7 @@
   --modal-overlay-bg: rgba(0, 0, 0, 0.5);
   --clear-button-bg: transparent;
   --clear-button-color: var(--secondary-text);
-  
+
   /* Distinct Card Colors */
   --quote-card-bg: #ffffff;
   --author-card-bg: #e8f6f3;
@@ -22,18 +22,18 @@
 
 /* Body */
 body {
-  display: flex; /* Enable Flexbox */
-  min-height: 100vh; /* Ensure the body takes at least the full viewport height */
+  display: flex;
+  min-height: 100vh;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background-color: var(--background-color);
   color: var(--text-color);
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* Prevent horizontal overflow */
+  overflow-x: hidden;
 }
 
 html {
-  overflow-y: scroll; /* Always show vertical scrollbar */
+  overflow-y: scroll;
 }
 
 .hidden {
@@ -52,11 +52,11 @@ html {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  position: fixed; /* Keep it fixed to the viewport */
+  position: fixed;
   top: 0;
   left: 0;
   bottom: 0;
-  z-index: 1000; /* Ensure it stays above other elements */
+  z-index: 1000;
   transition: transform 0.3s ease;
 }
 
@@ -67,7 +67,7 @@ html {
 #sidebarToggle {
   position: fixed;
   top: 20px;
-  left: 250px; /* Aligns with sidebar width */
+  left: 250px;
   z-index: 1001;
   background-color: var(--primary-color);
   color: white;
@@ -139,41 +139,37 @@ html {
 }
 
 .import-export-section {
-  margin-top: auto; /* Push to bottom */
+  margin-top: auto;
 }
 
 /****************************************************************
  * Main Content
  ****************************************************************/
-/* Make main content fit next to the sidebar without overlapping */
 main {
-  margin-left: 280px; /* Space for the fixed sidebar + some padding */
+  margin-left: 280px;
   padding: 20px;
   box-sizing: border-box;
-  flex: 1; /* Allow main to grow and fill available space */
+  flex: 1;
   background-color: var(--background-color);
-  overflow-y: auto; /* Enable vertical scrolling within main */
+  overflow-y: auto;
   transition: margin-left 0.3s ease;
 }
 
-/* Adjust main margin when sidebar is collapsed */
 #sidePanel.collapsed + #sidebarToggle + main {
-  margin-left: 60px; /* Adjust according to sidebarToggle position */
+  margin-left: 60px;
 }
 
 /****************************************************************
  * Quotes Page Layout
  ****************************************************************/
-/* Quotes Header */
 .quotes-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  flex-wrap: wrap;
 }
 
-/* Search Container */
 .search-container {
   position: relative;
   width: 100%;
@@ -181,33 +177,29 @@ main {
   flex: 1;
 }
 
-/* Spacing between search field and grid */
 .spacing {
   height: 20px;
 }
 
-/* Search Input */
 #quotesSearchInput {
   width: 100%;
-  padding: 10px 40px 10px 10px; /* Increased right padding for clear button */
+  padding: 10px 40px 10px 10px;
   font-size: 1rem;
   border: 1px solid var(--secondary-text);
   border-radius: 5px;
   transition: border-color 0.3s ease;
-  box-sizing: border-box; /* Ensure padding is included in total width */
+  box-sizing: border-box;
 }
-
 
 #quotesSearchInput:focus {
   outline: none;
   border-color: var(--accent-color);
 }
 
-/* Clear Button */
 .clear-button {
   position: absolute;
-  right: 10px; /* Align with the edge of the input field */
-  top: 50%; /* Vertically center */
+  right: 10px;
+  top: 50%;
   transform: translateY(-50%);
   background: var(--clear-button-bg);
   border: none;
@@ -217,14 +209,12 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1; /* Ensure button stays above the input */
-  height: 20px; /* Adjust as needed */
-  width: 20px; /* Adjust as needed */
+  z-index: 1;
+  height: 20px;
+  width: 20px;
   padding: 0;
 }
 
-
-/* Add Quote Button */
 #addQuoteToggle {
   font-size: 28px;
   width: 50px;
@@ -253,8 +243,8 @@ main {
 }
 
 .search-section h3 {
-  margin: 0; /* Remove top and bottom margins */
-  margin-bottom: 10px; /* Add a smaller bottom margin for spacing */
+  margin: 0;
+  margin-bottom: 10px;
   color: var(--primary-color);
   font-size: 1.5rem;
 }
@@ -271,12 +261,15 @@ main {
 .cards-container.grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 25px; /* Equal vertical and horizontal gaps */
-  align-items: stretch; /* Ensures all items stretch to fill the grid row */
+  gap: 25px;
+  align-items: stretch;
+
+  /* 3D perspective for tilt effect */
+  perspective: 800px;
 }
 
 .search-results-grid {
-  margin-top: 20px; /* Consistent spacing */
+  margin-top: 20px;
 }
 
 /****************************************************************
@@ -288,22 +281,25 @@ main {
   border-radius: 5px;
   padding: 20px;
   box-shadow: var(--box-shadow);
-  position: relative; /* Important for absolute positioning of .actions */
-  transition: background-color 0.3s ease;
+  position: relative;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* Distributes space between elements */
+  justify-content: space-between;
   overflow: hidden;
-  height: 100%; /* Ensures all cards are the same height */
+  height: 100%;
   box-sizing: border-box;
+
+  /* 3D transform style */
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
 .card:hover {
   background-color: #f0f0f0;
 }
 
-/* Specific Styles for Quote Cards */
+/* Quote Cards */
 .quote-card {
   background-color: var(--quote-card-bg);
 }
@@ -311,13 +307,13 @@ main {
 .quote-card .quote-text {
   font-size: 1rem;
   color: var(--secondary-text);
-  margin: 0; /* Removed extra top margin */
+  margin: 0;
   margin-bottom: 10px;
   text-align: justify;
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 4; /* Limit to 4 lines */
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
 }
 
@@ -349,7 +345,7 @@ main {
   font-size: 1rem;
 }
 
-/* Specific Styles for Author and Book Cards */
+/* Author and Book Cards */
 .author-card {
   background-color: var(--author-card-bg);
 }
@@ -374,22 +370,22 @@ main {
   background-color: var(--book-card-bg);
 }
 
-/* Actions (Edit & Delete) */
+/* Edit/Delete Actions */
 .actions {
   position: absolute;
-  bottom: 10px;  /* Position 10px from the bottom */
-  right: 10px;   /* Position 10px from the right */
-  display: flex; /* Use flex to align buttons horizontally */
-  gap: 10px;     /* Space between buttons */
-  z-index: 10;   /* Ensure buttons are on top of other content */
-  opacity: 0;    /* Fully transparent by default */
-  visibility: hidden; /* Hidden from accessibility tree by default */
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+  opacity: 0;
+  visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .card:hover .actions {
-  opacity: 1; /* Fully visible */
-  visibility: visible; /* Make accessible */
+  opacity: 1;
+  visibility: visible;
 }
 
 .actions button {
@@ -406,7 +402,6 @@ main {
   transition: background-color 0.3s ease;
 }
 
-/* Style for Edit Button */
 .edit-btn {
   background-color: var(--accent-color);
   color: #ffffff;
@@ -425,7 +420,6 @@ main {
   background-color: #d4ac0d;
 }
 
-/* Style for Delete Button */
 .delete-btn {
   background-color: var(--danger-color);
   color: #ffffff;
@@ -478,7 +472,7 @@ main {
   width: 100%;
   height: 100%;
   background: var(--modal-overlay-bg);
-  z-index: 999; 
+  z-index: 999;
 }
 
 /****************************************************************
@@ -529,7 +523,7 @@ main {
   resize: none;
   height: 120px;
   text-align: left;
-  margin: 0; /* Remove default margin */
+  margin: 0;
 }
 
 #quoteForm textarea:focus,
@@ -683,7 +677,7 @@ main {
   background-color: var(--danger-hover);
 }
 
-/* Scrollbar customization for content */
+/* Custom Scrollbar */
 .view-content::-webkit-scrollbar {
   width: 8px;
 }
@@ -710,13 +704,13 @@ main {
   }
 
   #sidePanel.collapsed + #sidebarToggle + main {
-    margin-left: 60px; /* Adjust according to collapsed sidebar */
+    margin-left: 60px;
   }
 
   main {
-    margin-left: 60px; /* Adjusted for collapsed sidebar */
+    margin-left: 60px;
     padding: 10px;
-    width: calc(100% - 60px); /* Adjust width for smaller screens */
+    width: calc(100% - 60px);
   }
 
   .quotes-header {
@@ -739,10 +733,9 @@ main {
     width: 100%;
   }
 
-  /* Adjust card grid for smaller screens */
   .quotes-grid .grid,
   .cards-container.grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px; /* Reduced gap for smaller screens */
+    gap: 20px;
   }
 }

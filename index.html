@@ -22,6 +22,11 @@
 
   <!-- Side Panel -->
   <div id="sidePanel" class="collapsed">
+    <!-- Mobile Close Button for Sidebar (visible on mobile) -->
+    <button id="mobileCloseBtn" class="mobile-close-button">
+      <span class="material-icons">close</span>
+    </button>
+
     <!-- Home Button -->
     <button id="homeSideBtn" class="side-button">
       <span class="material-icons">home</span> Home
@@ -57,12 +62,22 @@
       <!-- Hidden File Input for Import -->
       <input type="file" id="importFileInput" accept=".csv" class="hidden" />
     </div>
+
+    <!-- Add Quote Button relocated to sidebar -->
+    <button id="addQuoteToggle" class="side-button" title="Add Quote">
+      <span class="material-icons">add</span> Add Quote
+    </button>
   </div>
 
+  <!-- Mobile Menu Toggle Button for Phones (will be hidden when sidebar is open) -->
+  <button id="mobileMenuToggle" class="mobile-menu-toggle">
+    <span class="material-icons">menu</span>
+  </button>
 
   <main>
     <!-- Quotes Page (Default) -->
     <div id="quotesPage">
+      <!-- Quotes Header -->
       <div class="quotes-header">
         <!-- Integrated Search Field with Clear Button -->
         <div class="search-container">
@@ -75,11 +90,6 @@
             <span class="material-icons">close</span>
           </button>
         </div>
-
-        <!-- Add Quote Button -->
-        <button id="addQuoteToggle" title="Add Quote">
-          <span class="material-icons">add</span>
-        </button>
       </div>
 
       <div class="spacing"></div>

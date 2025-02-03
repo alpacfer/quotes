@@ -163,6 +163,9 @@ const exportBtn = document.getElementById("exportBtn");
 const importBtn = document.getElementById("importBtn");
 const importFileInput = document.getElementById("importFileInput");
 
+// Mobile Menu Toggle
+const mobileMenuToggle = document.getElementById("mobileMenuToggle");
+
 /********************************************************
  * Event Listeners
  ********************************************************/
@@ -225,6 +228,24 @@ deleteCancelBtn.addEventListener("click", cancelDeletion);
 
 // View Quote Modal: Copy Button
 copyQuoteBtn.addEventListener("click", copyQuoteToClipboard);
+
+// Import / Export Buttons Event Listeners
+exportBtn.addEventListener("click", exportQuotes);
+importBtn.addEventListener("click", () => {
+  importFileInput.click();
+});
+importFileInput.addEventListener("change", importQuotes);
+
+// Mobile Menu Toggle Event Listener
+if (mobileMenuToggle) {
+  mobileMenuToggle.addEventListener("click", toggleSidePanel);
+}
+
+// Mobile Close Button Event Listener
+const mobileCloseBtn = document.getElementById("mobileCloseBtn");
+if (mobileCloseBtn) {
+  mobileCloseBtn.addEventListener("click", closeSidePanel);
+}
 
 // Window click for closing modals if clicked outside the content
 window.addEventListener("click", (event) => {
@@ -766,11 +787,16 @@ function exportQuotes() {
     return;
   }
 
-  const headers = ["Quote", "Book Title", "Author Name"];
-  const rows = quotes.map(
-    (q) =>
-      `"${q.quoteText.replace(/"/g, '""')}", "${q.bookTitle.replace(/"/g, '""')}", "${q.authorName.replace(/"/g, '""')}"`
-  );
+  // Include tags in the CSV export.
+  const headers = ["Quote", "Book Title", "Author Name", "Tags"];
+  const rows = quotes.map((q) => {
+    // Join tags as a comma separated string (if available)
+    const tagsString = (q.tags && q.tags.length) ? q.tags.join(", ") : "";
+    return `"${q.quoteText.replace(/"/g, '""')}",` +
+           `"${q.bookTitle.replace(/"/g, '""')}",` +
+           `"${q.authorName.replace(/"/g, '""')}",` +
+           `"${tagsString.replace(/"/g, '""')}"`;
+  });
   const csvContent = [headers.join(","), ...rows].join("\n");
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
@@ -791,7 +817,8 @@ function importQuotes(e) {
   const reader = new FileReader();
   reader.onload = async function (ev) {
     const content = ev.target.result;
-    const lines = content.split("\n").filter((line) => line.trim());
+    // Split on CRLF or LF
+    const lines = content.split(/\r?\n/).filter((line) => line.trim());
 
     if (lines.length < 2) {
       alert("CSV file does not contain data.");
@@ -802,6 +829,8 @@ function importQuotes(e) {
     const quoteIndex = headers.indexOf("quote");
     const bookTitleIndex = headers.indexOf("book title");
     const authorNameIndex = headers.indexOf("author name");
+    // Check for tags column (optional)
+    const tagsIndex = headers.indexOf("tags");
 
     if (quoteIndex === -1 || bookTitleIndex === -1 || authorNameIndex === -1) {
       alert("Invalid CSV format. Expected: Quote, Book Title, Author Name.");
@@ -826,6 +855,17 @@ function importQuotes(e) {
         .replace(/""/g, '"')
         .trim();
 
+      let tags = [];
+      if (tagsIndex !== -1 && values.length > tagsIndex) {
+        const tagsField = values[tagsIndex]
+          .replace(/^"|"$/g, "")
+          .replace(/""/g, '"')
+          .trim();
+        if (tagsField) {
+          tags = tagsField.split(",").map((t) => t.trim()).filter((t) => t);
+        }
+      }
+
       if (quoteText && bookTitle && authorName) {
         const duplicate = quotes.find(
           (q) =>
@@ -839,7 +879,7 @@ function importQuotes(e) {
             quoteText,
             bookTitle,
             authorName,
-            tags: [],
+            tags,
           });
         }
       }
@@ -1054,3 +1094,21 @@ function copyQuoteToClipboard() {
       console.error("Could not copy text:", err);
     });
 }
+
+/********************************************************
+ * Mobile Menu Toggle
+ ********************************************************/
+function toggleSidePanel() {
+  if (sidePanel.classList.contains("open")) {
+    closeSidePanel();
+  } else {
+    openSidePanel();
+  }
+}
+
+// Close side panel when clicking on main content (for mobile)
+document.querySelector("main").addEventListener("click", () => {
+  if (window.innerWidth <= 600 && sidePanel.classList.contains("open")) {
+    closeSidePanel();
+  }
+});
